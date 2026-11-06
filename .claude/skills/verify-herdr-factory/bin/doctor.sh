@@ -39,6 +39,10 @@ else
   bad "the window of $RUN is not running"
 fi
 
+if [ -f "$SCRATCH/app/xserver" ]; then
+  if display="$(x_display)"; then ok "input: private X display $display"; else bad "the private X display of $RUN is gone"; fi
+fi
+
 if status="$(in_scratch herdr-app status 2>&1)"; then
   if grep -q '"errors": \[\]' <<<"$status"; then ok "status answers, no errors"; else bad "status errors: $status"; fi
 else

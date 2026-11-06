@@ -27,7 +27,7 @@ const shipped = (id, feature) => ({
 const failed = (id, feature) => ({ ...shipped(id, feature), phase: "failed" });
 
 test("a new question asks for one toast and one sound", () => {
-  const now = status([asking("r1", "019", ["BLOCK-1", "Which table?"])]);
+  const now = status([asking("r1", "019", ["Q-1", "Which table?"])]);
   const r = alerts([], now, { r1: "space-a" });
   assert.equal(r.alerts.length, 1);
   assert.equal(r.alerts.filter((a) => a.sound === "blocked").length, 1);
@@ -37,11 +37,11 @@ test("a new question asks for one toast and one sound", () => {
     level: "warning",
     action: { name: "space.select", args: { id: "space-a" } },
   });
-  assert.deepEqual(r.seen, [questionKey("r1", "BLOCK-1")]);
+  assert.deepEqual(r.seen, [questionKey("r1", "Q-1")]);
 });
 
 test("a question already alerted on asks for nothing", () => {
-  const now = status([asking("r1", "019", ["BLOCK-1", "Which table?"])]);
+  const now = status([asking("r1", "019", ["Q-1", "Which table?"])]);
   const first = alerts([], now, { r1: "space-a" });
   const again = alerts(first.seen, now, { r1: "space-a" });
   assert.deepEqual(again.alerts, []);
@@ -49,15 +49,15 @@ test("a question already alerted on asks for nothing", () => {
 });
 
 test("a remembered list survives a restart and still alerts nothing", () => {
-  const now = status([asking("r1", "019", ["BLOCK-1", "Which table?"])]);
+  const now = status([asking("r1", "019", ["Q-1", "Which table?"])]);
   const stored = JSON.stringify(alerts([], now, {}).seen);
   assert.deepEqual(alerts(storedList(stored), now, {}).alerts, []);
 });
 
 test("the same question id in two runs alerts twice", () => {
   const now = status([
-    asking("r1", "019", ["BLOCK-1", "One?"]),
-    asking("r2", "020", ["BLOCK-1", "Two?"]),
+    asking("r1", "019", ["Q-1", "One?"]),
+    asking("r2", "020", ["Q-1", "Two?"]),
   ]);
   const r = alerts([], now, { r1: "a", r2: "b" });
   assert.deepEqual(
@@ -70,10 +70,8 @@ test("the same question id in two runs alerts twice", () => {
 });
 
 test("each new question of a run alerts once, beside ones already seen", () => {
-  const now = status([
-    asking("r1", "019", ["BLOCK-1", "One?"], ["ASK-2", "Two?"]),
-  ]);
-  const r = alerts([questionKey("r1", "BLOCK-1")], now, {});
+  const now = status([asking("r1", "019", ["Q-1", "One?"], ["Q-2", "Two?"])]);
+  const r = alerts([questionKey("r1", "Q-1")], now, {});
   assert.deepEqual(
     r.alerts.map((a) => a.toast.body),
     ["Two?"],
@@ -82,7 +80,7 @@ test("each new question of a run alerts once, beside ones already seen", () => {
 });
 
 test("a run with no space alerts with nothing to click through to", () => {
-  const now = status([asking("r1", "019", ["BLOCK-1", "One?"])]);
+  const now = status([asking("r1", "019", ["Q-1", "One?"])]);
   const [a] = alerts([], now, {}).alerts;
   assert.equal(a.toast.action, undefined);
 });
@@ -90,15 +88,15 @@ test("a run with no space alerts with nothing to click through to", () => {
 test("questions of runs no longer listed are forgotten", () => {
   const now = status([asking("r2", "020")]);
   const r = alerts(
-    [questionKey("r1", "BLOCK-1"), questionKey("r2", "BLOCK-1"), "junk"],
+    [questionKey("r1", "Q-1"), questionKey("r2", "Q-1"), "junk"],
     now,
     {},
   );
-  assert.deepEqual(r.seen, [questionKey("r2", "BLOCK-1")]);
+  assert.deepEqual(r.seen, [questionKey("r2", "Q-1")]);
 });
 
 test("without a run list nothing alerts and nothing is forgotten", () => {
-  const seen = [questionKey("r1", "BLOCK-1")];
+  const seen = [questionKey("r1", "Q-1")];
   assert.deepEqual(alerts(seen, NONE, {}), { alerts: [], seen });
   const old = { kind: "old", version: "0.12.0" };
   assert.deepEqual(undismissed(["r1"], old), {

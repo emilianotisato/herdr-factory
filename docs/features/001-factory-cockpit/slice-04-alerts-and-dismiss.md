@@ -8,6 +8,8 @@
 - Inner loop: 2 runs, 0 red, about 0.1 min (3.4 s each); 50 tests, `alerts.js` 100% lines, 94.29% branches.
 - Deviations: none from the slice. Decisions AD-9 (a question on a run with no space toasts with no action; alerts wait for the spaces' git), AD-10 (a dismissed run that is live again shows).
 - Prove: FR-5 and FR-7 rows left for the checkpoint.
+- Prove FR-5 (checkpoint 2): a BLOCK appended to a001 raises the `003 needs you` toast; clicking it (`input.sh click`) selects shop; after `restart.sh` there is no toast and the store still lists both questions; alert unit test 13/13. Evidence: cp-2/alert-before.png, cp-2/alert-open-block.txt, cp-2/alert-toast.png, cp-2/alert-clicked-space.png, cp-2/alert-restart.txt, cp-2/alert-after-restart-1s.png, cp-2/alert-after-restart-3s.png, cp-2/alert-factory-status.json, cp-2/alert-unit-test.txt (each PNG with its `.txt`).
+- Prove FR-7 (checkpoint 2): × on `005 shipped` hides it while `006 shipped` on the same space shows, the press does not select shop, and it stays gone after `restart.sh`. A second shipped shop run was seeded before the drive. Evidence: cp-2/dismiss-seed.txt, cp-2/dismiss-before.png, cp-2/dismiss-drive.txt, cp-2/dismiss-after.png, cp-2/dismiss-after-restart.png (each PNG with its `.txt`).
 
 **Slice**: A question that opens raises one toast and the blocked sound, once per screen even across restarts, and the toast selects that space. A shipped or failed strip gets a × that hides it on this screen for good. Both are per-screen memory in the mod's `localStorage`, decided by pure functions.
 

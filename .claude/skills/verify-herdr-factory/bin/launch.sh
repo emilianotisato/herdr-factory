@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # launch.sh [run id]: fixtures, a scratch home, and a herdr-app window on its own core.
+# VERIFY_HERDR_INPUT=x11 puts the window on a private Xwayland display, so
+# input.sh can click and type in it without touching the owner's display.
 # Prints the run id every other helper takes.
 # shellcheck source-path=SCRIPTDIR source=lib.sh
 . "$(dirname "$0")/lib.sh"
@@ -20,21 +22,20 @@ printf '{"last_run":"%s","presented":[]}\n' "$(herdr-app --version | awk '{print
 
 "$REPO_DIR/tests/fixtures/factory-fixtures.sh" build "$FIXTURES" >/dev/null
 
-cd "$SCRATCH/app" || exit 1
-"${SCRATCH_ENV[@]}" setsid herdr-app </dev/null >"$SCRATCH/app/log" 2>&1 &
-pid=$!
-start="$(start_time "$pid")" || die "herdr-app exited at once: $(tail -5 "$SCRATCH/app/log")"
-echo "$pid $start" >"$SCRATCH/app/pid"
+if [ "${VERIFY_HERDR_INPUT:-}" = x11 ]; then
+  need Xwayland
+  n=40
+  while [ -e "/tmp/.X11-unix/X$n" ] || [ -e "/tmp/.X$n-lock" ]; do n=$((n + 1)); done
+  setsid Xwayland ":$n" -geometry 1400x900 -noreset </dev/null >"$SCRATCH/app/xserver.log" 2>&1 &
+  xpid=$!
+  xstart="$(start_time "$xpid")" || die "Xwayland exited at once: $(tail -5 "$SCRATCH/app/xserver.log")"
+  echo "$xpid $xstart :$n" >"$SCRATCH/app/xserver"
+  for _ in $(seq 1 50); do
+    [ -S "/tmp/.X11-unix/X$n" ] && break
+    sleep 0.1
+  done
+  [ -S "/tmp/.X11-unix/X$n" ] || die "Xwayland :$n did not open its socket; run cleanup.sh $RUN"
+fi
 
-for _ in $(seq 1 75); do
-  if in_scratch herdr-app status >"$SCRATCH/app/status.json" 2>/dev/null; then
-    if grep -q '"frame-welcome"' "$SCRATCH/app/status.json"; then
-      die "the welcome is up despite shared.json; see $SCRATCH/app/status.json"
-    fi
-    echo "$RUN"
-    exit 0
-  fi
-  app_pid >/dev/null || die "herdr-app exited: $(tail -5 "$SCRATCH/app/log")"
-  sleep 0.2
-done
-die "the window did not answer status in 15 s; run cleanup.sh $RUN"
+start_window
+echo "$RUN"

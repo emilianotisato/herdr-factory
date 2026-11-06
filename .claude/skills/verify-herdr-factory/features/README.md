@@ -39,4 +39,5 @@ Each feature file: an H1, one paragraph on the user-visible behavior, then exact
 
 - [Spaces](./spaces.md): open a fixture repo as a space in the sidebar, see it in `ls`. Proven by `bin/prove.sh`.
 - [Fixture runs](./fixture-runs.md): the factory runs a layout's factory command reads, one per run-strip state.
+- [Run actions](./run-actions.md): the toast a new question raises, × on a finished strip, Answer and its dialog. Needs a `VERIFY_HERDR_INPUT=x11` launch.
 - [Look](./look.md): light and dark appearance, themes, zoom: the conditions every screenshot is taken in.

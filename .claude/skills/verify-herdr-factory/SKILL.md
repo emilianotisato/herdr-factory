@@ -21,6 +21,7 @@ run="$(bin/launch.sh [run-id])"      # prints the run id; default MMDD-HHMMSS
 - Starts `herdr-app` with `HERDR_APP_HOME`, `HC_SESSION=vhf-<run>` and `XDG_STATE_HOME` set, and `HC_TERMINAL_ID`, `HC_TERMINAL_SOCKET`, `HC_SOCKET`, `HC_SCOPE` unset. Ready when `herdr-app status` answers on that home: about 0.5 s. Fails after 15 s.
 - **The factory command for a layout's props** is `<scratch>/fixtures/bin/factory`: it runs the real `factory` with `FACTORY_DATA_DIR` and `FACTORY_CONFIG_DIR` pointed at the fixtures. A scratch layout names it in `"props": { "factory": "…" }`.
 - **Isolation**: one run id is one window, one core, one fixture set. Two runs side by side are fine. A window opens on the owner's display; nothing here sends it keys or pointer events.
+- **Input**: `VERIFY_HERDR_INPUT=x11 bin/launch.sh [run]` starts a private rootful `Xwayland :N` (from :40, the first free) and puts the window on it, with `WAYLAND_DISPLAY` unset. `bin/input.sh` can then click and type in that window, and nothing reaches the owner's display. The X server shows as one more window on the owner's desktop; its pid is in `app/xserver`, and cleanup stops it.
 - **Stop**: `bin/cleanup.sh <run>`.
 
 ## Doctor
@@ -47,13 +48,25 @@ bin/appearance.sh <run> light    # or dark, or system
 bin/hc.sh <run> ls --json        # the scratch core's terminals
 ```
 
+**Pointer and keys**, on a run launched with `VERIFY_HERDR_INPUT=x11` only:
+
+```sh
+bin/input.sh <run> click 226 166 # window pixels, as in a shot.sh PNG at zoom 1
+bin/input.sh <run> type "Charge the saved card"
+bin/input.sh <run> key Return    # any keysym name: Escape, Tab
+bin/input.sh <run> geometry      # x y width height of the window
+bin/restart.sh <run>             # quit and start the window again: same home, core, display
+```
+
+`input.sh` builds `bin/xdrive.c` (XTest, `libx11` and `libxtst`) into the scratch on first use. Read the coordinates off a fresh `shot.sh` PNG; the window is 957×548 with no window manager to move it. The pointer stays where the last click left it, so a hover tooltip can show in the next shot.
+
 `herdr-app do` prints the created ids or `{"error": …}` and exits 1. Read the result, then confirm with `ls` or `status`. Use ids from `ls`, never the focused default.
 
 **Changing what the window shows**: edit files under `<scratch>/home/` (`layouts/`, `mods/`, `settings.json`); the window reloads within a second. A broken file writes `<name>.error` beside it and shows in `status`.
 
 **End to end in one call**: `bin/prove.sh [run-id]` launches, doctors, opens the shop repo as a space, takes `space-new.png`, checks the owner's window shows no scratch folder, cleans up and checks the evidence survived. About 5 s.
 
-There is no interactive driver: `terminal-browser` cannot reach a native window, and pointer or key automation on the owner's display is off limits. Every proof here is scripted and repeatable.
+`terminal-browser` cannot reach a native window, and pointer or key automation on the owner's display is off limits: clicks and keys go only to a private X display, through `input.sh`. Every proof here is scripted and repeatable.
 
 ## Evidence
 
@@ -91,6 +104,7 @@ Closes the window (`window.close` on the scratch home, then the recorded pid, ch
 - **Spaces live in the hc core, not in the home** ("Each machine keeps its spaces, tabs and splits in its core's `herdr-app` document", `AGENTS.md`). So a scratch home alone would share the owner's spaces, and a `space.new` would land in the owner's window too; this was not tried, on purpose. `HC_SESSION=vhf-<run>` gives the scratch window its own core (herdr-app starts it through `hc connect`, so the variable reaches it); `XDG_STATE_HOME` keeps its state out of `~/.local/state/herdr-core`. Never change `XDG_RUNTIME_DIR`: the Wayland socket lives there.
 - **A fresh home opens on the welcome dialog, and `overlay.close` does not close it** (it answers `ok` and the dialog stays). Launch seeds `frame.welcomed` instead. A fresh home also toasts "Updated to <version>" unless `update-notes.json` has `last_run`.
 - **`app.theme paper` does not make the window light** while the system is dark: it sets the light half only. `bin/appearance.sh <run> light` sets `appearance` in the scratch `settings.json`.
+- **Mods draw controls that no command reaches**: a toast's click, the strip's × and Answer, the answer dialog's input. `herdr-app commands` has no click or key command, and running a toast's action with `do` proves the action, not the click. Launch with `VERIFY_HERDR_INPUT=x11` and drive them with `input.sh`.
 - **A backgrounded shell function is a forked shell**: `in_scratch herdr-app &` records the shell's pid, not the window's. Launch backgrounds `"${SCRATCH_ENV[@]}" setsid herdr-app` directly.
 - **A fixture run's driver is a pid factory checks with its `/proc` start time.** Live fixtures stay live only while their `sleep infinity` runs; after `factory-fixtures.sh stop` they read `driverDead: true`. A parked run has no driver by design and never reads driver dead.
 - **`factory answer` needs more than an event.** It looks for the `kind: block` entry in the feature's `log.jsonl`, the feature's `slice-NN-*.md`, and the run's row in `factory.db`; a fixture missing any of them fails, the last one with `sqlite: FOREIGN KEY constraint failed` after it already appended `block_answered`. The builder writes all three, the block through `factory docs log add` itself.
@@ -103,6 +117,8 @@ Closes the window (`window.close` on the scratch home, then the recorded pid, ch
 | `bin/doctor.sh <run>` | read-only health check |
 | `bin/herdr.sh <run> <args…>` | `herdr-app <args…>` on the scratch window |
 | `bin/hc.sh <run> <args…>` | `hc <args…>` on the scratch core |
+| `bin/input.sh <run> click X Y\|type T\|key K\|geometry` | pointer and keys, private X display only |
+| `bin/restart.sh <run>` | quit and start the window again, localStorage and spaces kept |
 | `bin/appearance.sh <run> light\|dark\|system` | the window's appearance |
 | `bin/shot.sh <run> <name> [dir]` | PNG plus status and ls |
 | `bin/cleanup.sh <run>` | everything the run started, gone; evidence kept |

@@ -8,31 +8,31 @@ import {
 } from "../mods/factory-answer/lib/answer.js";
 
 const block = {
-  id: "BLOCK-3",
+  id: "Q-3",
   text: "Which store?",
-  answer: ["factory", "answer", "--feature", "007", "BLOCK-3"],
+  answer: ["factory", "answer", "--feature", "007", "Q-3"],
 };
 const ask = {
-  id: "ASK-1",
+  id: "Q-2",
   text: "Ship it?",
-  answer: ["factory", "answer", "--run", "r-42", "ASK-1"],
+  answer: ["factory", "answer", "--run", "r-42", "Q-2"],
 };
 
 test("the default command runs factory's argv with the text last", () => {
   assert.deepEqual(answerCall(block, undefined, "use sqlite"), {
     command: "factory",
-    args: ["answer", "--feature", "007", "BLOCK-3", "use sqlite"],
+    args: ["answer", "--feature", "007", "Q-3", "use sqlite"],
   });
   assert.deepEqual(answerCall(ask, null, "yes"), {
     command: "factory",
-    args: ["answer", "--run", "r-42", "ASK-1", "yes"],
+    args: ["answer", "--run", "r-42", "Q-2", "yes"],
   });
 });
 
 test("a wrapper command replaces only the first word", () => {
   assert.deepEqual(answerCall(block, "/tmp/fixture-factory", "b"), {
     command: "/tmp/fixture-factory",
-    args: ["answer", "--feature", "007", "BLOCK-3", "b"],
+    args: ["answer", "--feature", "007", "Q-3", "b"],
   });
 });
 
@@ -49,8 +49,8 @@ test("the question's argv is not changed", () => {
 });
 
 test("a question without an argv gives no call", () => {
-  assert.equal(answerCall({ id: "BLOCK-1", answer: [] }, null, "x"), null);
-  assert.equal(answerCall({ id: "BLOCK-1" }, null, "x"), null);
+  assert.equal(answerCall({ id: "Q-1", answer: [] }, null, "x"), null);
+  assert.equal(answerCall({ id: "Q-1" }, null, "x"), null);
   assert.equal(answerCall(null, null, "x"), null);
 });
 
@@ -63,10 +63,10 @@ test("blank text cannot be sent", () => {
 test("a refusal on stdout with an empty stderr shows stdout's first line", () => {
   const line = failureLine({
     code: 1,
-    stdout: "\nBLOCK-3 is already resolved (answered 10:02)\nmore\n",
+    stdout: "\nQ-3 is already resolved (answered 10:02)\nmore\n",
     stderr: "",
   });
-  assert.equal(line, "BLOCK-3 is already resolved (answered 10:02)");
+  assert.equal(line, "Q-3 is already resolved (answered 10:02)");
 });
 
 test("an empty stdout shows stderr's first line", () => {

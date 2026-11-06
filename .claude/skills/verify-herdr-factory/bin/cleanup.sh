@@ -7,18 +7,12 @@
 
 set_run "${1:-}"
 
-wait_gone() {
-  local pid="$1"
-  for _ in $(seq 1 25); do
-    [ -e "/proc/$pid" ] || return 0
-    sleep 0.2
-  done
-  return 1
-}
+stop_window
 
-if pid="$(app_pid)"; then
-  in_scratch herdr-app "do" window.close >/dev/null 2>&1 || true
-  wait_gone "$pid" || { kill "$pid" 2>/dev/null || true; wait_gone "$pid" || kill -9 "$pid" 2>/dev/null || true; }
+if x_display >/dev/null; then
+  read -r xpid _ _ <"$SCRATCH/app/xserver"
+  kill "$xpid" 2>/dev/null || true
+  wait_gone "$xpid" || kill -9 "$xpid" 2>/dev/null || true
 fi
 
 if [ -d "$STATE_HOME" ]; then
