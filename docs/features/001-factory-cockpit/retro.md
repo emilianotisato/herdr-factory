@@ -68,3 +68,5 @@ Pack (build): slice 5146 · prd_sections 2837 · log 3574 · outline 1536 · loo
 
 Compared with: No earlier retro in this repo.
 <!-- /factory:numbers -->
+
+**Owner review (2026-11-06):** 15 kept, 0 changed (AD-1, AD-3 to AD-9, AD-11 to AD-17).
