@@ -30,7 +30,7 @@ A slice is `pending → building → done`, or `blocked` while it waits on the o
 
 ## Reference (not feature work)
 
-_(none yet)_
+- [reference/verification.md](reference/verification.md) — the gate (`make gate`), the inner loop (`make inner`), each tier, the ratchet rule.
 
 ---
 

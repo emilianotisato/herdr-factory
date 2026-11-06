@@ -1,0 +1,11 @@
+# Cloned Herdr files go below, one path each. They are never reformatted, so a
+# re-clone diffs cleanly against Herdr's version. The strict type tier skips them
+# too (scripts/gate/types.sh reads this list). eslint and herdr-app check still run.
+# --- cloned ---
+# --- end cloned ---
+node_modules/
+docs/
+.claude/
+.agents/
+package-lock.json
+*.md
