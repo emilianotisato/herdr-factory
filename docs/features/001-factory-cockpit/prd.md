@@ -174,7 +174,15 @@ The dialog shows the question's `text`, which is the block's title, at most 160 
 
 ## 13. Slices
 
-_(Not sliced yet. Run `/slice` once §3 has shipped in factory and the gate exists.)_
+Five slices, sliced 2026-11-06 from `/deliver`. One branch, `feat/factory-cockpit`, one PR, one commit per slice; Prove rows are driven at the checkpoints.
+
+- **01, the harness**, goes first because the QA plan says so: a skill that opens a herdr-app window on a scratch home, fixture runs for every FR-4 state, and a factory wrapper. It writes no product code.
+- **02, the spine**, is FR-1 and FR-2: the verbatim clone of Herdr's spaces mod, the `factory` layout, `install.sh` with `--dev` and the drift warning. It is independent of 01, so the two build in parallel, and checkpoint 1 proves both.
+- **03, runs on their spaces**, is FR-3 and FR-4 together, because both are the data and the drawing of one strip in the same cloned file. It carries the risk: rows stop having a fixed height.
+- **04, alerts and dismiss**, is FR-5 and FR-7, both per-screen memory over the strips. Checkpoint 2 falls after it.
+- **05, answer**, is FR-6: a new dialog mod plus the strip's button. It is independent of 04, so they can build in parallel; checkpoint 3 closes the feature.
+
+The only human row is FR-4's look, in `qa-guide.md`.
 
 ## 14. Non-goals
 
