@@ -3,3 +3,7 @@ framework = 3
 gate = "make gate"
 inner = "make inner"
 gate_parallel = true
+lanes = 3
+
+[lanes]
+seed = ["node_modules"]
