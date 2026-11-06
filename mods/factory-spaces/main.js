@@ -448,7 +448,9 @@ export default class Spaces extends View {
         localStorage.setItem("groups.folded", JSON.stringify([...this.groupsFolded]));
         cx.notify();
       })
-      .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().child(head.name))
+      .when(!collapsed, el => el.child(h_flex().flex_1().min_w(0)
+          .child(div().id(`group-name-${head.id}`).min_w(0).truncate().hover(s => s.text_color(t.foreground))
+            .on_click((_e, cx) => { cx.stop_propagation(); this.nameGroup(head); }).child(head.name)))
         .child(div().flex_none().child(String(size))))
       .when(dot !== null, el => el.child(div().size(6).rounded(3).flex_none().bg(tone(t, dot))))
       .when(!collapsed, el => el.child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
@@ -585,6 +587,12 @@ export default class Spaces extends View {
       .text_color(t[p.color] ?? t.muted).child(p.text);
   }
 
+  // No group: makes one. A group: renames or deletes it.
+  nameGroup(group) {
+    openOverlay({ mod: "factory-prompt", kind: "dialog", modal: true, width: 420, height: 220,
+      props: group ? { group: { id: group.id, name: group.name } } : {} });
+  }
+
   // The strip shows its run's first question, so Answer answers that one.
   answer(id) {
     const r = this.factory.kind === "ok" ? this.factory.runs.find((r) => r.id === id) : null;
@@ -629,8 +637,11 @@ export default class Spaces extends View {
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
-        .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
-          .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14))))
+        .child(h_flex().flex_none().gap(2)
+          .when(!collapsed, el => el.child(div().id("group-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
+            .tooltip("New group").on_click(() => this.nameGroup(null)).child(svg("mods/workspace-chrome/folder-plus.svg").size(14))))
+          .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
+            .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14)))))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
         .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
         .children(this.grouped(t, collapsed)));

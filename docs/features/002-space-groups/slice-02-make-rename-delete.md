@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §3 FR-1. **Depends on**: 01 (the store, its reader and the `group-<id>` header this slice hangs the name click on)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- **Built:** `mods/factory-prompt/` (`main.js`, `mod.json`, `lib/edit.js`): a dialog titled "New group" or "Rename group" (name prefilled and selected, plus a Delete button). It writes `shared("space.groups")` itself and closes. Enter saves, Esc cancels, and Save stays disabled on a blank name. `lib/edit.js` holds `groupName`, `make`, `rename` and `remove`, tested in `tests/group-edit.test.js` (7 tests). `mods/factory-spaces/main.js` gets a `group-new` control beside `space-new`, a `group-name-<id>` click target on each group header that stops propagation so the click does not also fold the header, and `nameGroup()` to open the dialog (420×220, modal).
+- **Inner loop:** 2 runs, 1 red, about 1 min. The red run was the strict type tier: `this.text` in `init` was implicitly `any` because it is read through `this.props()`, so it now has an explicit `@type`.
+- **Deviations:** the slice's fallback was taken (AD-3): `herdr-app check` refuses a mod importing `../factory-spaces/lib/groups.js`. `group-new` is hidden in the narrow rail (AD-4).
+- **Prove (Task 5):** left for the checkpoint, nothing driven yet.
 
 **Slice**: The owner can make a group from a control on the Spaces header, rename it by clicking its name, and delete it from the same dialog, without seeding `shared.json`. The dialog is our own mod, `factory-prompt`, built like Herdr's `prompt`, and it writes the group itself. Joining a group is still slice 03's drag.
 
