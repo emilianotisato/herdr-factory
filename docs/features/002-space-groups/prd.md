@@ -82,9 +82,13 @@ Today a machine header folds with a chevron, remembered per screen in `localStor
 
 ## 8. QA plan
 
-**Gate**: none declared. Run `/gate` before slicing.
+**Gate**: `make gate`, inner loop `make inner` (`docs/project.toml`).
+
+*Corrected 2026-11-06 (slicing): an earlier draft said no gate was declared; PRD-001 built it.*
 **Surface**: the herdr-app window.
 **Harness**: PRD-001's `verify-herdr-factory`, built in its first slice. PRD-002 adds no harness slice. That harness drives commands and takes screenshots. It cannot click or drag: `herdr-app do` has no pointer commands, and this machine has no click tool (`wtype` types keys, `hyprctl` only moves the cursor; checked 2026-11-06). So the drop, order and ranking logic is proven by unit tests, the drawn result by screenshots of a seeded `shared.json`, and the gestures and the dialog by the owner.
+
+*Corrected 2026-11-06 (slicing): PRD-001 built a click-and-type mode into that harness (its AD-11: a private X display, `bin/input.sh click|move|type|key`). It still cannot press and hold, so drags stay the owner's. The dialog can now also be driven by the harness, and slice 02 does so; the owner still judges its look.*
 
 *Corrected 2026-11-06 (adversarial pass): an earlier draft marked FR-1 to FR-3 provable by the harness alone.*
 **Seed state**: a scratch home with five spaces on fixture folders, a `shared.json` holding two groups, and PRD-001's fixture runs. No remote machine: the cross-machine drop is proven by unit test only.
@@ -98,7 +102,13 @@ Today a machine header folds with a chevron, remembered per screen in `localStor
 
 ## 9. Slices
 
-_(Not sliced yet. Run `/slice` after PRD-001's clone exists and the gate is declared.)_
+Three slices, built in order, because all three edit `mods/factory-spaces/main.js` and each needs the one before it.
+
+- **01 — Groups drawn in order** (the spine): the `space.groups` store and its pure functions in `mods/factory-spaces/lib/groups.js`, loose spaces first then group headers, the core order kept equal to the drawn order, closed ids pruned, the header's name, count, fold and dot, and the rail's dot (FR-3's order, FR-4, FR-1's closed ids). Proven from a seeded `shared.json`.
+- **02 — Make, rename and delete**: the `factory-prompt` dialog, the new-group control and the name click (FR-1). Needs 01's store and header.
+- **03 — Drag to join, leave and sort**: one pure `drop()` and the handlers on rows and headers (FR-2, FR-3's header drag). After 02 because both put handlers on the same header, and the name click must keep renaming. The highest-risk slice, built last on a proven spine.
+
+Checkpoints fall after 02 and after 03. One branch, `feat/space-groups`, one PR, one commit per slice, Prove at the checkpoints. `qa-guide.md` holds the owner's rows: the dialog's look, the drags, the header drag and the dot.
 
 ## 10. Non-goals
 
