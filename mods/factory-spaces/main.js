@@ -632,7 +632,8 @@ export default class Spaces extends View {
       changed = true;
     }
     if (changed) setShared("space.colors", kept);
-    const groups = prune(readGroups(shared("space.groups")), ids);
+    const loaded = new Set(machines().filter(m => m.layout === "ready").map(m => m.name));
+    const groups = prune(readGroups(shared("space.groups")), ids, loaded);
     if (groups.changed) setShared("space.groups", groups.groups);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)

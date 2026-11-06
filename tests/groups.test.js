@@ -90,7 +90,11 @@ test("an arranged order arranges to itself", () => {
 
 test("closed spaces are pruned from their groups", () => {
   const groups = [group("acme", ["a", "gone"]), group("globex", ["b"])];
-  const { groups: kept, changed } = prune(groups, new Set(["a", "b"]));
+  const { groups: kept, changed } = prune(
+    groups,
+    new Set(["a", "b"]),
+    new Set([null]),
+  );
   assert.equal(changed, true);
   assert.deepEqual(
     kept.map((g) => g.spaces),
@@ -101,10 +105,23 @@ test("closed spaces are pruned from their groups", () => {
 
 test("nothing closed changes nothing", () => {
   const groups = [group("acme", ["a"])];
-  assert.deepEqual(prune(groups, new Set(["a", "b"])), {
+  assert.deepEqual(prune(groups, new Set(["a", "b"]), new Set([null])), {
     groups,
     changed: false,
   });
+});
+
+test("a group keeps its spaces until its machine's spaces have loaded", () => {
+  const groups = [group("acme", ["a"]), group("box", ["r"], "box")];
+  assert.deepEqual(prune(groups, new Set(), new Set()), {
+    groups,
+    changed: false,
+  });
+  const { groups: kept } = prune(groups, new Set(), new Set(["box"]));
+  assert.deepEqual(
+    kept.map((g) => g.spaces),
+    [["a"], []],
+  );
 });
 
 test("a junk store reads as an empty list", () => {

@@ -45,13 +45,17 @@ export function readGroups(stored) {
 }
 
 /**
+ * Drops closed spaces from the groups of machines whose spaces have loaded.
+ * Before that, an open space is not yet listed and would read as closed.
  * @param {Group[]} groups
  * @param {Set<string>} live ids of the open spaces
+ * @param {Set<string | null>} loaded machines whose spaces are read; null is this one
  * @returns {{ groups: Group[], changed: boolean }}
  */
-export function prune(groups, live) {
+export function prune(groups, live, loaded) {
   let changed = false;
   const out = groups.map((g) => {
+    if (!loaded.has(g.machine)) return g;
     const spaces = g.spaces.filter((id) => live.has(id));
     if (spaces.length === g.spaces.length) return g;
     changed = true;

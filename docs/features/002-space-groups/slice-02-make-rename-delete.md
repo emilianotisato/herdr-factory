@@ -8,6 +8,11 @@
 - **Inner loop:** 2 runs, 1 red, about 1 min. The red run was the strict type tier: `this.text` in `init` was implicitly `any` because it is read through `this.props()`, so it now has an explicit `@type`.
 - **Deviations:** the slice's fallback was taken (AD-3): `herdr-app check` refuses a mod importing `../factory-spaces/lib/groups.js`. `group-new` is hidden in the narrow rail (AD-4).
 - **Prove (Task 5):** left for the checkpoint, nothing driven yet.
+- **Checkpoint 1, FR-1 unit tests:** `cp-1/groups-unit-tests.txt` (23 pass).
+- **Checkpoint 1, FR-1 make:** `group-new` opens `cp-1/group-new-dialog-open.png`. Typing `acme` and pressing Enter gives an empty `acme` header, last, in `cp-1/group-made-acme.png`. Read-back: `cp-1/group-make-acme.txt`.
+- **Checkpoint 1, FR-1 rename:** clicking the name opens `cp-1/group-rename-dialog-open.png`. `Initech` and Enter give `cp-1/group-renamed-initech.png`. Read-back: `cp-1/group-rename-initech.txt`.
+- **Checkpoint 1, FR-1 delete:** Delete on `Initech` gives `cp-1/group-deleted-initech.png`. Delete on the seeded `acme` leaves `shop` open and loose: `cp-1/group-deleted-acme-space-loose.png`. Read-back: `cp-1/group-delete.txt`.
+- **Checkpoint 1, FR-1 closed ids:** `cp-1/close-grouped-space-shared-readback.txt`. The owner's look at the dialog stays a human row in `qa-guide.md`.
 
 **Slice**: The owner can make a group from a control on the Spaces header, rename it by clicking its name, and delete it from the same dialog, without seeding `shared.json`. The dialog is our own mod, `factory-prompt`, built like Herdr's `prompt`, and it writes the group itself. Joining a group is still slice 03's drag.
 
