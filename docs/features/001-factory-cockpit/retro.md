@@ -46,3 +46,25 @@ Written by `/deliver` in the closeout commit, from the agent's side of the run.
 ## Score
 
 4: every FR proven in the window, no block, and the review caught real defects at a fair cost. The point lost is the second opinion's 20 minutes on two passes with nothing to review, and a gate that never looked at the file where most of the bugs were.
+
+## Numbers
+
+<!-- factory:numbers -->
+| role | workers | own | subagents | weighted | minutes | turns |
+|---|---:|---:|---:|---:|---:|---:|
+| build | 5 | 2695848 | 0 | 2695848 | 27 | 170 |
+| merge | 1 | 47445 | 0 | 47445 | 1 | 7 |
+| checkpoint | 2 | 1561268 | 0 | 1561268 | 15 | 102 |
+| polish | 1 | 1463514 | 1444518 | 2908032 | 15 | 60 |
+| total | 9 | 5768074 | 1444518 | 7212592 | 57 | 339 |
+
+Knobs: build opus/high default · fix opus/high default · checkpoint opus/high default · polish opus/high default · budget 30000000 default · lanes 3 · factory 0.13.0 · claude 2.1.316
+
+Hypothesis: none
+
+quality: gate_red 0 · worker_gate_red 0 · fix_commits 0 · ci_red_rounds 0 · ci_reruns 0 · findings high=0 medium=13 low=36 fixed=27 parked=2 · decisions 17 decide 2 blocks 0
+
+Pack (build): slice 5146 · prd_sections 2837 · log 3574 · outline 1536 · lookup 1115 · contract 3095 · autonomy 8610 · inner_loop 25 · total 25938 · start_context 17104
+
+Compared with: No earlier retro in this repo.
+<!-- /factory:numbers -->
