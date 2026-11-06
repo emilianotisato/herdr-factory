@@ -3,7 +3,12 @@
 **Source**: [`prd.md`](prd.md) → §4 FR-1, §5 FR-2. **Depends on**: — (independent of 01; every later slice edits the clone this one creates)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- **Built.** `mods/factory-spaces/{main.js,mod.json}` byte-copied from herdr-app 0.1.13 (`cmp` clean); `layouts/factory.json` = `main.json` with only the spaces block's `mod` changed (one-line `diff`); all three in the `.prettierignore` cloned list. `upstream.json` records `0.1.13` and the `spaces` and `layout:main` hashes. `install.sh` copies (default) or symlinks (`--dev`) every `mods/factory-*` and `layouts/factory.json` into `${HERDR_APP_HOME:-~/.config/herdr-app}`, records them in `factory-install.txt` there (AD-2), refuses every unlisted target before writing anything, warns once on drift (python3 `-I`; skipped with a message when python3 or `installed.json` is missing), then switches the layout when `herdr-app status` succeeds, and otherwise says how to pick it. `tests/install.test.js` (7 tests) runs it against scratch homes with a stub `herdr-app` on PATH (version `0.1.99`, status controlled per test), so the owner's live window is never touched.
+- **Lint.** `@eslint/js` recommended flagged Herdr's two empty `catch {}` (`no-empty`, lines 126 and 149). A files-scoped `allowEmptyCatch` override for the cloned `main.js` fixes it; Herdr's code is unchanged (AD-1).
+- **Inner loop.** 2 runs, 1 red, ~1 min of runs. The red run was shellcheck SC1010 on `herdr-app do …`, fixed by quoting `"do"`.
+- **Not covered by a test.** The python3-missing branch (it needs a PATH without python3). Running `herdr-app check` on the installed copy is left to the FR-1 Prove row.
+- **Prove.** FR-1 and FR-2 rows are left for the checkpoint.
 
 **Slice**: A coworker runs `./install.sh` and gets a `factory` layout that looks exactly like Herdr's `main`, drawn by `factory-spaces`, a verbatim clone of Herdr's spaces mod, with nothing else changed. `--dev` links instead of copying. A Herdr release that changes the spaces mod or the main layout gets a warning. No run is drawn yet: that is slice 03.
 

@@ -21,6 +21,11 @@ export default [
     },
   },
   {
+    // Herdr's own code, kept byte-identical so a re-clone diffs cleanly.
+    files: ["mods/factory-spaces/main.js"],
+    rules: { "no-empty": ["error", { allowEmptyCatch: true }] },
+  },
+  {
     files: ["tests/**/*.js", "scripts/**/*.js", "*.js"],
     languageOptions: {
       ecmaVersion: 2022,

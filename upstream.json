@@ -1,0 +1,12 @@
+{
+  "herdr-app": "0.1.13",
+  "installed": {
+    "spaces": {
+      "main.js": "829379c2a6776f3e",
+      "mod.json": "4a42ed2202338077"
+    },
+    "layout:main": {
+      "json": "d25b961ea961fba1"
+    }
+  }
+}

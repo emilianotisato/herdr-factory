@@ -2,6 +2,9 @@
 # re-clone diffs cleanly against Herdr's version. The strict type tier skips them
 # too (scripts/gate/types.sh reads this list). eslint and herdr-app check still run.
 # --- cloned ---
+mods/factory-spaces/main.js
+mods/factory-spaces/mod.json
+layouts/factory.json
 # --- end cloned ---
 node_modules/
 docs/
