@@ -105,6 +105,59 @@ export function arrange(units, groups) {
   return out;
 }
 
+/**
+ * @typedef {{ kind: "space", id: string, machine: string | null, worktree: boolean }
+ *   | { kind: "group", id: string }} Dragged
+ * @typedef {{ kind: "head", id: string }
+ *   | { kind: "row", id: string, machine: string | null, group: string | null }} Target
+ */
+
+/**
+ * The store after a drop, or null when the drop changes no group. A space
+ * dropped on a header joins that group; a grouped space dropped on a loose row
+ * leaves its group; a header dropped on a header moves that group to the side
+ * it came from the other way: below when dragged down, above when dragged up.
+ * A drop inside one container is a reorder, not a change of groups.
+ * @param {Group[]} groups
+ * @param {Dragged} dragged
+ * @param {Target} target
+ * @param {{ from: string | null }} facts the group the dragged space is drawn in
+ * @returns {Group[] | null}
+ */
+export function drop(groups, dragged, target, facts) {
+  if (dragged.kind === "group") {
+    if (target.kind !== "head" || target.id === dragged.id) return null;
+    const from = groups.findIndex((g) => g.id === dragged.id);
+    const to = groups.findIndex((g) => g.id === target.id);
+    if (from === -1 || to === -1) return null;
+    const moving = groups[from];
+    if (moving.machine !== groups[to].machine) return null;
+    const rest = groups.filter((g) => g !== moving);
+    const at = rest.indexOf(groups[to]) + (from < to ? 1 : 0);
+    return [...rest.slice(0, at), moving, ...rest.slice(at)];
+  }
+  if (dragged.worktree) return null;
+  const without = (/** @type {Group} */ g) =>
+    g.spaces.includes(dragged.id)
+      ? { ...g, spaces: g.spaces.filter((id) => id !== dragged.id) }
+      : g;
+  if (target.kind === "head") {
+    const into = groups.find((g) => g.id === target.id);
+    if (!into || into.machine !== dragged.machine || facts.from === into.id)
+      return null;
+    return groups.map((g) => {
+      const kept = without(g);
+      return g === into
+        ? { ...kept, spaces: [...kept.spaces, dragged.id] }
+        : kept;
+    });
+  }
+  if (target.machine !== dragged.machine || target.group === facts.from)
+    return null;
+  if (facts.from === null || target.group !== null) return null;
+  return groups.map(without);
+}
+
 /** @type {Dot[]} */
 const RANK = ["blocked", "done", "working", "idle"];
 /** @type {Record<string, Dot>} */

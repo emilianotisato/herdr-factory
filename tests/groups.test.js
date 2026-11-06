@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   arrange,
+  drop,
   groupDot,
   prune,
   readGroups,
@@ -174,4 +175,124 @@ test("the most urgent thing inside wins", () => {
 
 test("no status and no run give no dot", () => {
   assert.equal(groupDot([], []), null);
+});
+
+const space = (id, machine = null, worktree = false) => ({
+  kind: "space",
+  id,
+  machine,
+  worktree,
+});
+const head = (id) => ({ kind: "head", id });
+const rowOf = (id, group = null, machine = null) => ({
+  kind: "row",
+  id,
+  machine,
+  group,
+});
+const dragGroup = (id) => ({ kind: "group", id });
+const members = (groups) =>
+  Object.fromEntries(groups.map((g) => [g.id, g.spaces]));
+const order = (groups) => groups.map((g) => g.id);
+
+test("a space dropped on a header joins that group", () => {
+  const groups = [group("acme", ["g1"]), group("globex", [])];
+  const next = drop(groups, space("a"), head("acme"), { from: null });
+  assert.deepEqual(members(next), { acme: ["g1", "a"], globex: [] });
+});
+
+test("a space dropped on another group's header leaves its own group", () => {
+  const groups = [group("acme", ["a", "b"]), group("globex", ["c"])];
+  const next = drop(groups, space("a"), head("globex"), { from: "acme" });
+  assert.deepEqual(members(next), { acme: ["b"], globex: ["c", "a"] });
+});
+
+test("a grouped space dropped on a loose row leaves its group", () => {
+  const groups = [group("acme", ["a", "b"])];
+  const next = drop(groups, space("a"), rowOf("loose"), { from: "acme" });
+  assert.deepEqual(members(next), { acme: ["b"] });
+});
+
+test("a header dragged down lands below the header it is dropped on", () => {
+  const groups = [group("acme", []), group("globex", []), group("initech", [])];
+  const next = drop(groups, dragGroup("acme"), head("globex"), { from: null });
+  assert.deepEqual(order(next), ["globex", "acme", "initech"]);
+});
+
+test("a header dragged up lands above the header it is dropped on", () => {
+  const groups = [group("acme", []), group("globex", []), group("initech", [])];
+  const next = drop(groups, dragGroup("initech"), head("globex"), {
+    from: null,
+  });
+  assert.deepEqual(order(next), ["acme", "initech", "globex"]);
+});
+
+test("a space from another machine is not dropped on a group", () => {
+  const groups = [group("acme", [])];
+  assert.equal(
+    drop(groups, space("r", "box"), head("acme"), { from: null }),
+    null,
+  );
+});
+
+test("a worktree is not dropped on a header on its own", () => {
+  const groups = [group("acme", [])];
+  assert.equal(
+    drop(groups, space("wt", null, true), head("acme"), { from: null }),
+    null,
+  );
+});
+
+test("a header dropped on a row changes nothing", () => {
+  const groups = [group("acme", ["a"]), group("globex", [])];
+  assert.equal(
+    drop(groups, dragGroup("globex"), rowOf("a", "acme"), { from: null }),
+    null,
+  );
+  assert.equal(
+    drop(groups, dragGroup("globex"), rowOf("b"), { from: null }),
+    null,
+  );
+});
+
+test("a loose space dropped on a grouped row changes nothing", () => {
+  const groups = [group("acme", ["g1"])];
+  assert.equal(
+    drop(groups, space("a"), rowOf("g1", "acme"), { from: null }),
+    null,
+  );
+});
+
+test("a grouped space dropped on another group's row changes nothing", () => {
+  const groups = [group("acme", ["a"]), group("globex", ["c"])];
+  assert.equal(
+    drop(groups, space("a"), rowOf("c", "globex"), { from: "acme" }),
+    null,
+  );
+});
+
+test("a drop inside one container changes no group", () => {
+  const groups = [group("acme", ["a", "b"])];
+  assert.equal(
+    drop(groups, space("a"), rowOf("b", "acme"), { from: "acme" }),
+    null,
+  );
+  assert.equal(drop(groups, space("x"), rowOf("y"), { from: null }), null);
+});
+
+test("a space dropped on its own group's header changes nothing", () => {
+  const groups = [group("acme", ["a"])];
+  assert.equal(drop(groups, space("a"), head("acme"), { from: "acme" }), null);
+});
+
+test("a header dropped on itself or another machine's header changes nothing", () => {
+  const groups = [group("acme", []), group("box", [], "box")];
+  assert.equal(
+    drop(groups, dragGroup("acme"), head("acme"), { from: null }),
+    null,
+  );
+  assert.equal(
+    drop(groups, dragGroup("acme"), head("box"), { from: null }),
+    null,
+  );
 });

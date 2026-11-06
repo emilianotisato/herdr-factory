@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §4 FR-2, §5 FR-3 (the header drag). **Depends on**: 02 (same header element: the name click 02 adds must keep renaming once this slice puts a drag on the header)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- **Built**: `drop(groups, dragged, target, facts)` in `mods/factory-spaces/lib/groups.js` (`facts.from`: the group the dragged space is drawn in) with 13 tests in `tests/groups.test.js`: join, join from another group, leave, a header dragged down and up, and every no-op (remote space, worktree, header on a row, loose on a grouped row, grouped on another group's row, a drop inside one container, a space on its own header, a header on itself or another machine's header). In `main.js` the header has its own drag state (`pressedHead`, `overHead`), so a row never reads a group id; it folds on release on itself, shows the accent line on the landing side while another header is over it, and an accent outline while a space would join it. A row drop inside one container keeps `space.move`; across containers only `drop()` writes the store. The name click clears the drag and renames. `endDrag()` clears both drags on any release.
+- **Inner loop**: 1 run, 0 red, 0.1 min.
+- **Deviations**: AD-5 (decide) the two row drops the PRD does not name do nothing; AD-6 (fyi) a joined or left space keeps its core place, and a leave target shows an outline, not the reorder line.
+- **Prove**: left for the checkpoint (FR-2, FR-3 rows).
 
 **Slice**: A space dropped on a group header joins that group; a grouped space dropped on a loose row leaves it; a header dragged onto another header moves the whole group, landing on the side the accent line shows. Where every drop lands is one pure function, pinned by unit tests, because the harness cannot drag.
 
