@@ -65,11 +65,11 @@ feature() {
   } >"$dir/state.toml"
 }
 
-# block <repo> <nnn> <slice> <question>: an open BLOCK-n in the feature's log,
-# written by factory itself, so `factory answer` finds it.
+# block <repo> <nnn> <slice> <question>: an open block in the feature's log,
+# written by factory itself, so `factory answer` finds it. Prints the id factory gave it.
 block() {
   printf '**Happened:** %s\n**Options:** one; the other.\n**Recommended:** one.\n' "$4" |
-    (cd "$1" && "$out/bin/factory" docs log add "$2" --kind block --slice "$3" --title "$4" --body-file - >/dev/null)
+    (cd "$1" && "$out/bin/factory" docs log add "$2" --kind block --slice "$3" --title "$4" --body-file -)
 }
 
 commit_repo() {
@@ -123,7 +123,7 @@ run() {
 
 build() {
   [ -e "$out/data" ] && die "$out already holds fixtures; stop and delete it first"
-  local real shop api loner today paused_until k='"kind"'
+  local real shop api loner today paused_until block_id k='"kind"'
   local gift_card="A gift card can pay part of an order: is the rest charged to the saved card or asked for again?"
   real="$(command -v factory)" || die "factory is not on PATH"
   command -v sqlite3 >/dev/null || die "sqlite3 is not installed"
@@ -148,7 +148,7 @@ EOF
   feature "$shop" 003 checkout-flow "Checkout in three steps" in-progress \
     "done" "done" "done" "done" building pending pending pending pending pending
   feature "$shop" 004 gift-cards "Gift cards at checkout" in-progress "done" blocked pending pending
-  block "$shop" 004 2 "$gift_card"
+  block_id="$(block "$shop" 004 2 "$gift_card")"
   feature "$shop" 005 order-emails "Order confirmation emails" shipped "done" "done" "done"
   commit_repo "$shop"
 
@@ -171,7 +171,7 @@ EOF
     "$k:\"slice_spawned\",\"slice\":5,\"session_id\":\"fixture-session\",\"pid\":0"
   run "004-$today-a002" "$shop" 004 waiting-owner live 60 5100000 "" \
     "$k:\"run_started\"" "$k:\"slice_done\",\"slice\":1" \
-    "$k:\"slice_blocked\",\"slice\":2,\"block_id\":\"BLOCK-1\",\"question\":\"$gift_card\"" \
+    "$k:\"slice_blocked\",\"slice\":2,\"block_id\":\"$block_id\",\"question\":\"$gift_card\"" \
     "$k:\"run_waiting\",\"blocked\":[2],\"asks\":[]"
   run "005-$today-a003" "$shop" 005 finished dead 300 12600000 '"pr_url":"https://github.com/example/shop/pull/100"' \
     "$k:\"run_started\"" "$k:\"slice_done\",\"slice\":1" "$k:\"slice_done\",\"slice\":2" \

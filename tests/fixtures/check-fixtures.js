@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const quiet = {
-  questions: [],
+  questions: 0,
   driverDead: false,
   pausedUntil: null,
   parked: null,
@@ -28,7 +28,7 @@ export const expected = {
     phase: "waiting-owner",
     slices: 4,
     ...quiet,
-    questions: ["BLOCK-1"],
+    questions: 1,
   },
   a003: {
     state: "shipped",
@@ -91,7 +91,7 @@ export function checkRuns(payload) {
       repo: run.repo.split("/").pop(),
       phase: run.phase,
       slices: run.slices?.length ?? null,
-      questions: run.questions.map((/** @type {{ id: string }} */ q) => q.id),
+      questions: run.questions.length,
       driverDead: run.driverDead,
       pausedUntil: run.pausedUntil && "set",
       parked: run.parked,

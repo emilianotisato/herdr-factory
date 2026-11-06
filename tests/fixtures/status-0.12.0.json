@@ -15,7 +15,7 @@
       "feature": "020",
       "phase": "waiting-owner",
       "line": "020 \u00b7 waiting-owner",
-      "owner": ["BLOCK-1 open: Which index?"],
+      "owner": ["Q-1 open: Which index?"],
       "board": ["020 \u00b7 waiting-owner"]
     }
   ]

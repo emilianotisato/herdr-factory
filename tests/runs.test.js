@@ -174,7 +174,7 @@ test("ten slices are ten segments", () => {
 
 test("owner needed: the block in the blocked color, the question and Answer", () => {
   const s = strip(run("020"));
-  assert.equal(words(s.first), "020 · BLOCK-1 open");
+  assert.equal(words(s.first), "020 · Q-1 open");
   assert.equal(s.first[2].color, "blocked");
   assert.equal(s.second[0].text, "Which index keeps the soft delete?");
   assert.equal(s.second[0].fill, true);

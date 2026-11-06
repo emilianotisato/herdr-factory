@@ -60,14 +60,14 @@
       "feature": "020",
       "phase": "waiting-owner",
       "line": "020 \u00b7 waiting-owner",
-      "owner": ["BLOCK-1 open: Which index?"],
+      "owner": ["Q-1 open: Which index?"],
       "questions": [
         {
-          "id": "BLOCK-1",
+          "id": "Q-1",
           "at": "slice",
           "n": 2,
           "text": "Which index keeps the soft delete?",
-          "answer": ["factory", "answer", "--feature", "020", "BLOCK-1"]
+          "answer": ["factory", "answer", "--feature", "020", "Q-1"]
         }
       ],
       "board": ["020 \u00b7 waiting-owner"],

@@ -9,6 +9,8 @@
 - **Inner loop.** 2 runs, 1 red, ~1 min of runs. The red run was shellcheck SC1010 on `herdr-app do …`, fixed by quoting `"do"`.
 - **Not covered by a test.** The python3-missing branch (it needs a PATH without python3). Running `herdr-app check` on the installed copy is left to the FR-1 Prove row.
 - **Prove.** FR-1 and FR-2 rows are left for the checkpoint.
+- **FR-1, checkpoint 1.** On a scratch `HERDR_APP_HOME` with `settings.json` and `keys.json`: install, install again, `herdr-app check` on the installed mod (exit 0), `--dev` (both paths symlinks into the checkout), each followed by `ls -la` and `cmp` (both personal files identical); over a foreign `mods/factory-spaces/` it exits 1, names it, and every file's sha256 is unchanged. Evidence: `cp-1/install-transcript.txt`.
+- **FR-2, checkpoint 1.** With a stale recorded `spaces` hash, install onto the running scratch window warns with both versions, installs and switches to `factory`; with no run anywhere, `main` and `factory` frames differ by 0 pixels. Evidence: `cp-1/install-stale-hash.txt`, `cp-1/layout-main-no-runs.png`, `cp-1/layout-factory-no-runs.png`, `cp-1/layout-compare.txt`.
 
 **Slice**: A coworker runs `./install.sh` and gets a `factory` layout that looks exactly like Herdr's `main`, drawn by `factory-spaces`, a verbatim clone of Herdr's spaces mod, with nothing else changed. `--dev` links instead of copying. A Herdr release that changes the spaces mod or the main layout gets a warning. No run is drawn yet: that is slice 03.
 
