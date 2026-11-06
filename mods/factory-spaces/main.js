@@ -1,5 +1,5 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
-// grouped by machine when more than one is known. After a space's name, the repo
+// grouped by machine when more than one is known, then into the owner's groups (lib/groups.js). After a space's name, the repo
 // its first terminal is in now, only where unusual: branch, ahead/behind. Agent state lives in the agents list, not here. Click to
 // switch, right-click for its menu, drag to reorder. Under a space's name, its repo's
 // factory runs (lib/runs.js), with a toast for each new question (lib/alerts.js).
@@ -9,6 +9,7 @@ import { v_flex, h_flex } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, props, home, notify, playSound } from "herdr";
 import { NONE, TOO_OLD, STRIP_HEIGHT, TOO_OLD_HEIGHT, bySpace, laneHeight, readStatus, urgent } from "./lib/runs.js";
 import { alerts, storedList, undismissed } from "./lib/alerts.js";
+import { arrange, groupDot, prune, readGroups } from "./lib/groups.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -72,6 +73,7 @@ export default class Spaces extends View {
     this.reconnecting = JSON.parse(localStorage.getItem("machines.reconnecting") ?? "{}");
     for (const state of Object.values(this.reconnecting)) state.busy = false;
     this.folded = new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]"));
+    this.groupsFolded = new Set(JSON.parse(localStorage.getItem("groups.folded") ?? "[]"));
     this.refreshMachines(cx);
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // `git status` walks the whole tree, on another machine a process there:
@@ -333,7 +335,8 @@ export default class Spaces extends View {
       && this.ordering.machines.every(name => machines().some(m => m.name === name && m.layout === "ready"));
   }
 
-  // Spaces in order, each worktree space moved under its main checkout's.
+  // Spaces in drawn order: loose ones, then each group's, each worktree space
+  // under its main checkout's. Group headers come back among the rows.
   ordered() {
     const sp = spaces(), ps = panes();
     const ready = (w) => this.shown.has(w.id) || where(w, ps) in this.git || Date.now() - (this.born[w.id] ??= Date.now()) > 1500;
@@ -341,16 +344,19 @@ export default class Spaces extends View {
     const list = sp.map((w, i) => ({ w, i, g: this.git[where(w, ps)] ?? null }));
     const mains = new Set(list.filter((r) => r.g && !r.g.linked).map((r) => r.g.repo));
     const nested = (r) => r.g?.linked && mains.has(r.g.repo);
-    const out = [];
+    const units = [];
     const placed = new Set(); // repos whose worktrees are listed (under the first of its spaces)
     for (const r of list) {
       if (nested(r)) continue;
-      out.push({ ...r, tree: null });
+      const unit = { id: r.w.id, machine: r.w.machine ?? null, row: { ...r, tree: null }, kids: [] };
+      units.push(unit);
       if (!r.g || r.g.linked || placed.has(r.g.repo)) continue;
       placed.add(r.g.repo);
       const kids = list.filter((k) => nested(k) && k.g.repo === r.g.repo);
-      kids.forEach((k, n) => out.push({ ...k, tree: n === kids.length - 1 ? "└─" : "├─" }));
+      unit.kids = kids.map((k, n) => ({ ...k, tree: n === kids.length - 1 ? "└─" : "├─" }));
     }
+    const items = arrange(units, readGroups(shared("space.groups")));
+    const out = items.filter(it => it.row).map(it => it.row);
     // Simulate the batch so later indexes include earlier moves. An attempted
     // write can lose a sync conflict: allow the echo to settle before retrying.
     const order = sp.map(w => w.id);
@@ -370,15 +376,20 @@ export default class Spaces extends View {
       }
       this.ordering.machines = [...moved];
     }
-    return out.filter(r => this.shown.has(r.w.id));
+    return items.filter(it => !it.row || this.shown.has(it.row.w.id)).map(it => (it.row ? { ...it.row, group: it.group } : it));
   }
 
   // The rows, under a header per machine once one isn't this computer.
   grouped(t, collapsed) {
-    const rows = this.ordered();
+    const items = this.ordered();
+    const rows = items.filter(it => it.w);
     // factory's runs are on this computer: a space on another machine has none.
     this.lanes = bySpace(undismissed(this.dismissed, this.factory).status, rows.map(({ w, g }) => placeOf(w, g)));
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
+    // A folded group's spaces keep their place in the order; they are only not drawn.
+    const block = (m) => items.filter(it => (it.head ? it.head.machine : it.w.machine ?? null) === m)
+      .flatMap(it => it.head ? [this.groupHead(it, rows.filter(r => r.group === it.head.id), t, collapsed)]
+        : it.group && this.groupsFolded.has(it.group) ? [] : [draw(it)]);
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
       const layout = machines().find(k => k.name === m)?.layout;
@@ -386,10 +397,10 @@ export default class Spaces extends View {
         || spaces().some(s => (s.machine ?? null) === m && !this.shown.has(s.id));
     };
     const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
-    if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : rows.map(draw);
+    if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : block(null);
     const machineNames = [null, ...remote];
     return machineNames.flatMap((m) => {
-      const mine = rows.filter((r) => (r.w.machine ?? null) === m);
+      const mine = block(m);
       const repair = this.reconnecting[m];
       const machine = this.machines.find(k => k.name === m) ?? repair?.machine;
       const connected = !m || machine?.state === "connected";
@@ -421,8 +432,26 @@ export default class Spaces extends View {
         .on_click(() => run("space.new", { machine: m ?? "" }))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
       if (!collapsed && rebuilt) return [head];
-      return [head, ...(folded ? [] : mine.length ? mine.map(draw) : [loading(m) ? loadingRow(m) : empty])];
+      return [head, ...(folded ? [] : mine.length ? mine : [loading(m) ? loadingRow(m) : empty])];
     });
+  }
+
+  // A press folds or unfolds it. In the rail it shows only its dot.
+  groupHead({ head, size }, members, t, collapsed) {
+    const folded = this.groupsFolded.has(head.id);
+    const dot = groupDot(members.map(r => r.w.status), members.flatMap(r => this.lanes[r.w.id]?.strips.map(s => s.state) ?? []));
+    return h_flex().id(`group-${head.id}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
+      .when(collapsed, el => el.justify_center())
+      .cursor_pointer().hover(s => s.bg(t.hover))
+      .on_click((_e, cx) => {
+        folded ? this.groupsFolded.delete(head.id) : this.groupsFolded.add(head.id);
+        localStorage.setItem("groups.folded", JSON.stringify([...this.groupsFolded]));
+        cx.notify();
+      })
+      .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().child(head.name))
+        .child(div().flex_none().child(String(size))))
+      .when(dot !== null, el => el.child(div().size(6).rounded(3).flex_none().bg(tone(t, dot))))
+      .when(!collapsed, el => el.child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
   }
 
   // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
@@ -595,6 +624,8 @@ export default class Spaces extends View {
       changed = true;
     }
     if (changed) setShared("space.colors", kept);
+    const groups = prune(readGroups(shared("space.groups")), ids);
+    if (groups.changed) setShared("space.groups", groups.groups);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))

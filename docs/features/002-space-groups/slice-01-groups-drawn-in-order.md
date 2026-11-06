@@ -3,7 +3,21 @@
 **Source**: [`prd.md`](prd.md) → §5 FR-3 (the order, not the header drag), §6 FR-4, §3 FR-1 (closed ids leave a group). **Depends on**: — (the spine: slices 02 and 03 both build on the store, the header row and the order this slice lands)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- **Built.** `mods/factory-spaces/lib/groups.js` has four parts:
+  - `readGroups()` makes any stored value into a valid list. An entry without a string id is dropped, a repeated group id keeps its first entry, and a space id repeated inside one group is kept once.
+  - `prune()` drops the ids of closed spaces and reports whether anything changed.
+  - `arrange(units, groups)` returns the drawn order: loose spaces first, then each group's header (`size` = the spaces drawn under it) and its members in their current order, each member's worktrees right after it. A space listed in two groups belongs to the first. A space listed in a group of another machine stays loose. A worktree listed on its own is ignored.
+  - `groupDot()` gives the header's dot.
+
+  `tests/groups.test.js` has 15 tests, and `groups.js` is at 100% line coverage. In `main.js`:
+  - `ordered()` builds units (a checkout plus its worktree kids) and feeds them to `arrange()`. The existing `space.move` loop targets only the rows, never the headers. It returns headers among the rows, and each row carries its `group`.
+  - `grouped()` draws each machine's block from those items: loose rows, then each group's header and members. A folded group's members are skipped when drawing but stay in the move target.
+  - `groupHead()` draws the header (`group-<id>`): name, count, dot, chevron. A click folds it, stored under `localStorage` key `groups.folded`. In the rail it shows only the dot.
+  - `render()` prunes `space.groups` next to `space.colors`.
+- **Inner loop:** 1 run, 0 red, under 1 min (4 s). The format tier rewrapped the two new files.
+- **Decisions:** AD-1 (what the header count counts) and AD-2 (a group's row in the narrow rail), both fyi.
+- **Left for the checkpoint (task 6):** FR-3 `ls`/`space.select --index 3`/restart transcripts, FR-4 screenshots (folded BLOCK dot light and dark, narrow rail, fold kept after restart), FR-1 closed-id prune read back from `shared.json`.
 
 **Slice**: Groups written into `shared("space.groups")` are drawn: loose spaces first, then one header per group with its spaces under it, and the core's space order follows the drawn order so `alt-1..9` match it. A header shows the group's name, its number of spaces, a fold chevron and one dot for the most urgent thing inside; in the narrow rail it shows only the dot. Closed spaces drop out of their group. Nothing yet writes a group except a seeded `shared.json`: making one is slice 02, joining and sorting by drag is slice 03.
 
