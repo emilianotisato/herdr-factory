@@ -41,3 +41,24 @@ Leaks: nothing the check should have caught.
 ## Score
 
 4 — every slice was green first time and Prove caught a real restart defect, but the highest-severity bug only showed at polish, because the harness has no second machine.
+
+## Numbers
+
+<!-- factory:numbers -->
+| role | workers | own | subagents | weighted | minutes | turns |
+|---|---:|---:|---:|---:|---:|---:|
+| build | 3 | 750696 | 0 | 750696 | 10 | 56 |
+| checkpoint | 2 | 1177030 | 0 | 1177030 | 10 | 88 |
+| polish | 1 | 570622 | 312251 | 882873 | 8 | 33 |
+| total | 6 | 2498348 | 312251 | 2810599 | 28 | 177 |
+
+Knobs: build opus/high default · fix opus/high default · checkpoint opus/high default · polish opus/high default · budget 30000000 default · lanes 3 · factory 0.13.0 · claude 2.1.316
+
+Hypothesis: none
+
+quality: gate_red 0 · worker_gate_red 1 · fix_commits 0 · ci_red_rounds 0 · ci_reruns 0 · findings high=1 medium=2 low=8 fixed=6 parked=0 · decisions 6 decide 1 blocks 0
+
+Pack (build): slice 8093 · prd_sections 3127 · log 1981 · outline 5949 · lookup 1115 · contract 3095 · autonomy 8610 · inner_loop 25 · total 31994 · start_context 19420
+
+Compared with: No earlier retro in this repo.
+<!-- /factory:numbers -->
