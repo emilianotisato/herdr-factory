@@ -5,8 +5,9 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, props, home } from "herdr";
+import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, props, home, notify, playSound } from "herdr";
 import { NONE, TOO_OLD, STRIP_HEIGHT, TOO_OLD_HEIGHT, bySpace, laneHeight, readStatus, urgent } from "./lib/runs.js";
+import { alerts, storedList, undismissed } from "./lib/alerts.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -28,6 +29,8 @@ function place(s, ps) {
 }
 const rowHeight = ({ tree }) => (tree ? 28 : 30);
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
+// What factory needs to place a space's runs: its git top, on this computer only.
+const placeOf = (w, g) => ({ id: w.id, top: !w.machine && g ? g.top : null, repo: !w.machine && Boolean(g) });
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 // Changes made outside Herdr (an editor's save, a commit in another app): looked
 // for this often, in repos the list shows, while the window is in front.
@@ -75,6 +78,8 @@ export default class Spaces extends View {
     cx.timer.every(250, (cx) => this.checkNew(cx));
     this.factory = NONE;
     this.lanes = {}; // space -> what factory shows under it
+    this.alerted = storedList(localStorage.getItem("factory.alerted")); // questions this screen toasted
+    this.dismissed = storedList(localStorage.getItem("factory.dismissed")); // finished runs whose strip was closed
     this.askRuns(cx);
     cx.timer.every(RUNS_EVERY, (cx) => { if (window().active) this.askRuns(cx); });
     this.watchRuns(cx);
@@ -91,6 +96,8 @@ export default class Spaces extends View {
         this.factory = await readStatus((args) => exec(command, args));
       } while (this.askAgain);
       this.asking = false;
+      this.forget();
+      this.raise();
       cx.notify();
     });
   }
@@ -101,6 +108,38 @@ export default class Spaces extends View {
     cx.spawn(async (cx) => {
       try { for (;;) { await watchFolder(dir); this.askRuns(cx); } } catch {}
     });
+  }
+
+  // Toasts each question this screen has not alerted on, once its space is known:
+  // while a local space's git is unread, the run may be one of its.
+  raise() {
+    if (this.factory.kind !== "ok") return;
+    const sp = spaces(), ps = panes();
+    this.raiseDue = sp.some((s) => !s.machine && JSON.parse(where(s, ps))[1] && !(where(s, ps) in this.git));
+    if (this.raiseDue) return;
+    const spaceOf = {};
+    const lanes = bySpace(this.factory, sp.map((w) => placeOf(w, this.git[where(w, ps)] ?? null)));
+    for (const [id, lane] of Object.entries(lanes)) for (const s of lane.strips) spaceOf[s.id] ??= id;
+    const r = alerts(this.alerted, this.factory, spaceOf);
+    if (r.seen.length !== this.alerted.length || r.alerts.length) localStorage.setItem("factory.alerted", JSON.stringify(r.seen));
+    this.alerted = r.seen;
+    for (const a of r.alerts) {
+      notify(a.toast);
+      playSound(a.sound);
+    }
+  }
+
+  forget() {
+    const kept = undismissed(this.dismissed, this.factory).dismissed;
+    if (kept.length === this.dismissed.length) return;
+    this.dismissed = kept;
+    localStorage.setItem("factory.dismissed", JSON.stringify(kept));
+  }
+
+  dismiss(id, cx) {
+    if (!this.dismissed.includes(id)) this.dismissed = [...this.dismissed, id];
+    localStorage.setItem("factory.dismissed", JSON.stringify(this.dismissed));
+    cx.notify();
   }
 
   checkNew(cx) {
@@ -220,6 +259,7 @@ export default class Spaces extends View {
       const used = new Set(Object.values(this.git).filter(Boolean).map((g) => JSON.parse(g.repo)).filter(([on]) => !on).map(([, repo]) => repo));
       for (const repo of this.watching) if (!used.has(repo)) this.watching.delete(repo);
       this.refreshing = false;
+      if (this.raiseDue) this.raise();
       cx.notify();
     });
   }
@@ -330,7 +370,7 @@ export default class Spaces extends View {
   grouped(t, collapsed) {
     const rows = this.ordered();
     // factory's runs are on this computer: a space on another machine has none.
-    this.lanes = bySpace(this.factory, rows.map(({ w, g }) => ({ id: w.id, top: !w.machine && g ? g.top : null, repo: !w.machine && Boolean(g) })));
+    this.lanes = bySpace(undismissed(this.dismissed, this.factory).status, rows.map(({ w, g }) => placeOf(w, g)));
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
@@ -489,6 +529,14 @@ export default class Spaces extends View {
     if (p.kind === "bar") {
       return h_flex().flex_1().min_w(30).gap(2).items_center().when(p.dim, (el) => el.opacity(0.4))
         .children(p.colors.map((c) => div().flex_1().max_w(14).h(4).rounded(2).bg(t[c])));
+    }
+    if (p.kind === "control" && p.action === "dismiss") {
+      // A press here is not the row's: it neither selects nor drags the space.
+      return div().id(`dismiss-${s.id}`).flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted).cursor_pointer()
+        .hover((st) => st.text_color(t.foreground)).tooltip("Hide this run on this screen")
+        .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+        .on_mouse_up("left", (_e, cx) => { cx.stop_propagation(); this.dismiss(s.id, cx); })
+        .child(p.text);
     }
     if (p.kind === "control") {
       return div().id(`run-${s.id}-${p.action}`).flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted)

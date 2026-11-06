@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §8 FR-5, §10 FR-7. **Depends on**: 03 (both read the run model and the strips it draws)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `mods/factory-spaces/lib/alerts.js` — `alerts(seen, status, spaceOf)` returns one toast (`NNN needs you`, the question, `warning`, `space.select` on the run's space) and one `blocked` sound per question not yet seen, keyed by run id and question id, and drops keys of runs no longer listed; `undismissed(dismissed, status)` hides dismissed shipped/failed runs and drops ids of unlisted runs; `storedList()` reads a stored list. `tests/alerts.test.js`: 13 tests. `main.js`: after each poll it prunes the dismissed list, then posts the toasts and plays `blocked` per new id once every local space's git is read (`factory.alerted`, `factory.dismissed` in `localStorage`); × on shipped and failed strips hides the strip, and its press neither selects nor drags the space.
+- Inner loop: 2 runs, 0 red, about 0.1 min (3.4 s each); 50 tests, `alerts.js` 100% lines, 94.29% branches.
+- Deviations: none from the slice. Decisions AD-9 (a question on a run with no space toasts with no action; alerts wait for the spaces' git), AD-10 (a dismissed run that is live again shows).
+- Prove: FR-5 and FR-7 rows left for the checkpoint.
 
 **Slice**: A question that opens raises one toast and the blocked sound, once per screen even across restarts, and the toast selects that space. A shipped or failed strip gets a × that hides it on this screen for good. Both are per-screen memory in the mod's `localStorage`, decided by pure functions.
 
