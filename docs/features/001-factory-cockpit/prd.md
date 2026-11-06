@@ -6,7 +6,7 @@ type: feature
 created: 2026-11-06
 author: Emiliano Tisato
 summary: |
-  Each repo's space in the herdr-app sidebar shows its factory runs live: a segmented slice bar, phase, elapsed, budget, last gate, then PR and CI once shipped. A question that opens raises a toast and a sound once, and an Answer button opens a dialog whose Send runs `factory answer`. Coworkers get it with `./install.sh`, which never touches their settings or keys. Agreed 2026-11-06, nothing cut. Waits on a factory release with structured status fields (§3) and on a verify gate.
+  Each repo's space in the herdr-app sidebar shows its factory runs live: a segmented slice bar, phase, elapsed, budget, last gate, then PR and CI once shipped. A question that opens raises a toast and a sound once, and an Answer button opens a dialog whose Send runs `factory answer`. Coworkers get it with `./install.sh`, which never touches their settings or keys. Agreed 2026-11-06, nothing cut. The factory fields shipped in factory 0.13.0 (PRD-023); waits only on a verify gate.
 ---
 
 # PRD-001 — Factory cockpit in the herdr-app spaces sidebar
@@ -52,6 +52,8 @@ The exact shape is factory's call. The builder reads the shipped schema at slice
 
 **Accepted cost:** PRD-001 cannot start until that factory release exists.
 
+**Shipped 2026-11-06 in factory 0.13.0** (factory PRD-023, commit `82f770a`). `schema` stays 1 and the prose fields stay, so the Claude Code cockpit mod needs no change. `--recent` adds the runs that ended in the last 7 days. The fields are in §15. Two gaps remain, filed by factory's polish as idea `2026-11-06-status-json-for-the-herdr-cockpit-full-question-te`: a question's `text` is the block's title only, and `seq` counts events only. FR-3 and FR-6 below take both into account.
+
 ## 4. FR-1 — `install.sh`
 
 Today the repo holds only the docs framework; nothing installs anything.
@@ -78,11 +80,11 @@ The repo records the `herdr-app --version` and the `installed.json` hash of `spa
 
 ## 6. FR-3 — one call, mapped to spaces
 
-**Decided 2026-11-06.** `factory-spaces` runs `factory status --json` once every 10 s while the window is in front, and once at once when anything changes under factory's runs folder (`watchFolder`, `herdr.d.ts`). A run belongs to the space whose git top level (`git rev-parse --show-toplevel`, which the spaces mod already runs in `check()`) equals the run's repo. factory records a run's repo the same way (factory `src/paths.rs:170-190`). A worktree space, including a factory lane opened as a space, has its own top level, so the run shows on the main checkout's row only.
+**Decided 2026-11-06.** `factory-spaces` runs `factory status --json --recent` once every 10 s while the window is in front, and once at once when anything changes under factory's runs folder (`watchFolder`, `herdr.d.ts`). A run belongs to the space whose git top level (`git rev-parse --show-toplevel`, which the spaces mod already runs in `check()`) equals the run's repo. factory records a run's repo the same way (factory `src/paths.rs:170-190`). A worktree space, including a factory lane opened as a space, has its own top level, so the run shows on the main checkout's row only.
 
 *Corrected 2026-11-06 (adversarial pass): an earlier draft matched on the git common dir. Every linked worktree shares the main checkout's common dir, so that rule put the strip on every lane row too, and contradicted its own next sentence.*
 
-When `factory` is missing, the strip is not drawn and nothing else changes. When `factory` is older than the release of §3, each space with a repo shows one dim line: `factory too old · factory upgrade`.
+When `factory` is missing, the strip is not drawn and nothing else changes. When `factory` is older than the release of §3, each space with a repo shows one dim line: `factory too old · factory upgrade`. `schema` is still 1 on both sides of that release, so "older" means the envelope's `factory` version is below 0.13.0. Each poll redraws from the whole payload and never skips one because `seq` did not move: budget, PR and pause change `state.json` without an event.
 
 **Accepted cost:** one process every 10 s per window, about 30 ms each at today's 67 run folders.
 
@@ -122,7 +124,9 @@ In the narrow rail (sidebar under 160 px), a space shows one dot after its numbe
 
 ## 9. FR-6 — answer from the window
 
-**Decided 2026-11-06.** **Answer** opens a dialog, `factory-answer`, built like Herdr's `prompt` mod (`mods/prompt/main.js`): the run, the question in full, a text input, Cancel and Send. Send runs `factory answer --feature <NNN> <ID> <TEXT>` with the run's repo as the folder. The flag goes first: the answer text is a trailing argument (factory `src/cli/answer.rs:21`), so a flag after it becomes answer words. On exit 0 the dialog closes and a `success` toast says it was sent. Otherwise the dialog stays open with the text kept and factory's first output line under the input, from stdout, else stderr. An already resolved id is reported on stdout with exit 1 (factory `src/cli/answer.rs:192-193`).
+**Decided 2026-11-06.** **Answer** opens a dialog, `factory-answer`, built like Herdr's `prompt` mod (`mods/prompt/main.js`): the run, the question in full, a text input, Cancel and Send. Send runs the question's `answer` argv with the typed text appended, with the run's repo as the folder. factory builds that argv with the flag before the id, `factory answer --feature 007 BLOCK-3` or `--run` for an ASK (factory `src/cli/status.rs:287-295`), because the answer text is a trailing argument (`src/cli/answer.rs:21`).
+
+The dialog shows the question's `text`, which is the block's title, at most 160 characters. The options and the recommendation are only in the feature's `log.jsonl`. Decided 2026-11-06: the dialog shows the title and a dim hint, `full question: factory status <run id>`. **Accepted cost:** for a question with options, the owner reads them in a terminal before answering. Reading `log.jsonl` from the mod lost because it parses factory's internal format. A factory field lost for now; it stays open as factory's idea. On exit 0 the dialog closes and a `success` toast says it was sent. Otherwise the dialog stays open with the text kept and factory's first output line under the input, from stdout, else stderr. An already resolved id is reported on stdout with exit 1 (factory `src/cli/answer.rs:192-193`).
 
 *Corrected 2026-11-06 (adversarial pass): an earlier draft put `--feature` after the text and read the error from stderr only. Both were wrong.*
 
@@ -183,7 +187,9 @@ _(Not sliced yet. Run `/slice` once §3 has shipped in factory and the gate exis
 
 ## 15. Verification notes
 
-Checked 2026-11-06 against herdr-app 0.1.13, hc 0.1.18, and the factory tree at `86f34fd` (`Cargo.toml` 0.12.1; the installed binary is 0.12.0). **Re-verify at slice entry.**
+Checked 2026-11-06 against herdr-app 0.1.13, hc 0.1.18, and the factory tree at `86f34fd` (`Cargo.toml` 0.12.1; the installed binary is 0.12.0). Factory re-checked the same day at `df3a82d`, release 0.13.0.
+
+- factory 0.13.0 `status --json --recent`, per run (`src/cli/status.rs:50-104`, camelCase): `id`, `feature`, `phase`, `line`, `owner`, `board`, `repo`, `branch`, `slug`, `title`, `startedAt`, `updatedAt`, `elapsedSeconds`, `seq`, `slices` (`[{n, status}]`, status `pending`/`building`/`done`/`blocked`, null when the board will not open), `budget` (`{used, limit}`), `checkpoints` (`{done, lastGate}`, `green`/`red`/null), `pr`, `ci` (`green`/`red`/`pending`/`none`/null), `pausedUntil`, `parked`, `driverDead`, `stopped`, `questions` (`[{id, at, n, text, answer}]`). Envelope: `{schema: 1, factory: "0.13.0", runs}`. 24 runs returned on 2026-11-06 with `--recent`. **Re-verify at slice entry.**
 
 - `~/.config/herdr-app/layouts/main.json` — the sidebar's spaces block is `{ "mod": "spaces" }` under `sidebar-lists`.
 - `~/.config/herdr-app/mods/spaces/main.js` — `check()` runs `git rev-parse --git-common-dir`; `ordered()` nests linked worktrees under their main checkout.
@@ -193,6 +199,6 @@ Checked 2026-11-06 against herdr-app 0.1.13, hc 0.1.18, and the factory tree at 
 - A symlinked mod folder passes `herdr-app check` (tested 2026-11-06). Rendering one inside a layout is not yet tested.
 - Not yet verified, for the harness slice: that a second herdr-app opens with another `HERDR_APP_HOME`. Whether `exec` forwards the app's environment no longer matters: the layout props name the factory command (§12).
 - factory `src/paths.rs:170-190` — a run's repo is `git rev-parse --show-toplevel`; `mods/spaces/main.js:212` runs the same.
-- factory `src/cli/status.rs:43-50` — `RunJson` has no repo, slices, budget, gate, PR or structured questions.
+- ~~factory `src/cli/status.rs:43-50` — `RunJson` has no repo, slices, budget, gate, PR or structured questions.~~ True at `86f34fd`; fixed by 0.13.0.
 - factory `src/cockpit.rs:311-316` — `live_runs` drops runs whose phase is over.
 - factory `src/cli/answer.rs:21` — the text is `trailing_var_arg`, so flags go before the id; `:192-193` prints `already resolved` on stdout and exits 1.
