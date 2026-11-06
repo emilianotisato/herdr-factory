@@ -3,7 +3,10 @@
 **Source**: [`prd.md`](prd.md) → §9 FR-6. **Depends on**: 03 (the owner-needed strip carries the Answer button)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `mods/factory-answer/lib/answer.js` (`answerCall` keeps factory's argv and appends the text as one argument, a configured command replacing only `answer[0]`; `failureLine` takes stdout's first non-blank line, else stderr's, else the exit code; `canSend` refuses blank text; the `full question: factory status <run id>` hint), covered by `tests/answer.test.js` (10 tests). `mods/factory-answer/main.js` and `mod.json` after Herdr's `prompt`: the question id as title, feature and run id, the question's title, the dim hint, the input focused on open with the 600 ms refocus, Enter or Send runs `exec(cmd, args, { cwd: run.repo })`, Esc or Cancel closes; exit 0 closes with a `success` toast (`Answer sent`, id · feature), otherwise the text stays and factory's line shows under the input in `blocked`. Send is dimmed and inert while blank or sending. In `factory-spaces/main.js` the owner-needed strip's Answer is clickable (its mouse down stops so the row does not start a drag or select the space) and opens the dialog with the run, its first question and the layout's `factory` prop. × stays inert (slice 04).
+- Inner loop: 2 runs, 1 red, under 1 min. The red run caught a strict-type error: `e.message` on the `unknown` catch value.
+- Deviations: AD-8 (Answer answers the run's first open question, `fyi`). The FR-6 Prove row is left for the checkpoint.
 
 **Slice**: The owner-needed strip's **Answer** opens a dialog with the question's title, a hint to the full question, a text input, Cancel and Send. Send runs factory's own `answer` argv with the text. Success closes it with a toast; failure keeps the text and shows factory's line.
 

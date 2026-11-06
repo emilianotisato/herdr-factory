@@ -470,7 +470,7 @@ export default class Spaces extends View {
   }
 
   strip(s, t) {
-    const line = (parts) => h_flex().h(15).flex_none().min_w(0).gap(5).items_center().children(parts.map((p) => this.part(p, t)));
+    const line = (parts) => h_flex().h(15).flex_none().min_w(0).gap(5).items_center().children(parts.map((p) => this.part(p, t, s)));
     return v_flex()
       .id(`run-${s.id}`)
       .h(STRIP_HEIGHT)
@@ -485,14 +485,29 @@ export default class Spaces extends View {
       .child(line(s.second));
   }
 
-  part(p, t) {
+  part(p, t, s) {
     if (p.kind === "bar") {
       return h_flex().flex_1().min_w(30).gap(2).items_center().when(p.dim, (el) => el.opacity(0.4))
         .children(p.colors.map((c) => div().flex_1().max_w(14).h(4).rounded(2).bg(t[c])));
     }
-    if (p.kind === "control") return div().flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted).child(p.text);
+    if (p.kind === "control") {
+      return div().id(`run-${s.id}-${p.action}`).flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted)
+        .when(p.action === "answer", (el) => el.cursor_pointer().hover((st) => st.text_color(t.foreground))
+          .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+          .on_click((_e, cx) => { cx.stop_propagation(); this.answer(s.id); }))
+        .child(p.text);
+    }
     return div().when(Boolean(p.fill), (el) => el.flex_1().min_w(0).truncate()).when(!p.fill, (el) => el.flex_none())
       .text_color(t[p.color] ?? t.muted).child(p.text);
+  }
+
+  // The strip shows its run's first question, so Answer answers that one.
+  answer(id) {
+    const r = this.factory.kind === "ok" ? this.factory.runs.find((r) => r.id === id) : null;
+    if (!r?.questions.length) return;
+    openOverlay({ mod: "factory-answer", kind: "dialog", width: 460, height: 330, props: {
+      run: { id: r.id, feature: r.feature, repo: r.repo }, question: r.questions[0], factory: props()?.factory ?? null,
+    } });
   }
 
   compact({ w, i }, t) {
