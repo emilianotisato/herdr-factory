@@ -1,7 +1,7 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
-// grouped by machine when more than one is known. After a space's name, the repo
+// grouped by machine when more than one is known, then into the owner's groups (lib/groups.js). After a space's name, the repo
 // its first terminal is in now, only where unusual: branch, ahead/behind. Agent state lives in the agents list, not here. Click to
-// switch, right-click for its menu, drag to reorder. Under a space's name, its repo's
+// switch, right-click for its menu, drag to reorder, onto a group's header to join it, onto a loose space to leave it. Under a space's name, its repo's
 // factory runs (lib/runs.js), with a toast for each new question (lib/alerts.js).
 
 import { View, div, svg } from "gpui-kit";
@@ -9,6 +9,7 @@ import { v_flex, h_flex } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, props, home, notify, playSound } from "herdr";
 import { NONE, TOO_OLD, STRIP_HEIGHT, TOO_OLD_HEIGHT, bySpace, laneHeight, readStatus, urgent } from "./lib/runs.js";
 import { alerts, storedList, undismissed } from "./lib/alerts.js";
+import { arrange, drop, groupDot, prune, readGroups } from "./lib/groups.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -66,12 +67,17 @@ export default class Spaces extends View {
     // worktree appears under its repo instead of jumping there.
     this.shown = new Set(spaces().map((s) => s.id));
     this.born = {};
-    this.pressed = null;
+    this.pressed = null; // the space being dragged
+    this.source = null; // { group, worktree } of the space being dragged
     this.over = null;
+    this.pressedHead = null; // the group whose header is being dragged
+    this.overHead = null;
+    this.strayed = false; // the dragged header has left its own row
     this.machines = [];
     this.reconnecting = JSON.parse(localStorage.getItem("machines.reconnecting") ?? "{}");
     for (const state of Object.values(this.reconnecting)) state.busy = false;
     this.folded = new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]"));
+    this.groupsFolded = new Set(JSON.parse(localStorage.getItem("groups.folded") ?? "[]"));
     this.refreshMachines(cx);
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // `git status` walks the whole tree, on another machine a process there:
@@ -333,7 +339,8 @@ export default class Spaces extends View {
       && this.ordering.machines.every(name => machines().some(m => m.name === name && m.layout === "ready"));
   }
 
-  // Spaces in order, each worktree space moved under its main checkout's.
+  // Spaces in drawn order: loose ones, then each group's, each worktree space
+  // under its main checkout's. Group headers come back among the rows.
   ordered() {
     const sp = spaces(), ps = panes();
     const ready = (w) => this.shown.has(w.id) || where(w, ps) in this.git || Date.now() - (this.born[w.id] ??= Date.now()) > 1500;
@@ -341,16 +348,19 @@ export default class Spaces extends View {
     const list = sp.map((w, i) => ({ w, i, g: this.git[where(w, ps)] ?? null }));
     const mains = new Set(list.filter((r) => r.g && !r.g.linked).map((r) => r.g.repo));
     const nested = (r) => r.g?.linked && mains.has(r.g.repo);
-    const out = [];
+    const units = [];
     const placed = new Set(); // repos whose worktrees are listed (under the first of its spaces)
     for (const r of list) {
       if (nested(r)) continue;
-      out.push({ ...r, tree: null });
+      const unit = { id: r.w.id, machine: r.w.machine ?? null, row: { ...r, tree: null }, kids: [] };
+      units.push(unit);
       if (!r.g || r.g.linked || placed.has(r.g.repo)) continue;
       placed.add(r.g.repo);
       const kids = list.filter((k) => nested(k) && k.g.repo === r.g.repo);
-      kids.forEach((k, n) => out.push({ ...k, tree: n === kids.length - 1 ? "└─" : "├─" }));
+      unit.kids = kids.map((k, n) => ({ ...k, tree: n === kids.length - 1 ? "└─" : "├─" }));
     }
+    const items = arrange(units, readGroups(shared("space.groups")));
+    const out = items.filter(it => it.row).map(it => it.row);
     // Simulate the batch so later indexes include earlier moves. An attempted
     // write can lose a sync conflict: allow the echo to settle before retrying.
     const order = sp.map(w => w.id);
@@ -370,15 +380,20 @@ export default class Spaces extends View {
       }
       this.ordering.machines = [...moved];
     }
-    return out.filter(r => this.shown.has(r.w.id));
+    return items.filter(it => !it.row || this.shown.has(it.row.w.id)).map(it => (it.row ? { ...it.row, group: it.group } : it));
   }
 
   // The rows, under a header per machine once one isn't this computer.
   grouped(t, collapsed) {
-    const rows = this.ordered();
+    const items = this.ordered();
+    const rows = items.filter(it => it.w);
     // factory's runs are on this computer: a space on another machine has none.
     this.lanes = bySpace(undismissed(this.dismissed, this.factory).status, rows.map(({ w, g }) => placeOf(w, g)));
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
+    // A folded group's spaces keep their place in the order; they are only not drawn.
+    const block = (m) => items.filter(it => (it.head ? it.head.machine : it.w.machine ?? null) === m)
+      .flatMap(it => it.head ? [this.groupHead(it, rows.filter(r => r.group === it.head.id), t, collapsed)]
+        : it.group && this.groupsFolded.has(it.group) ? [] : [draw(it)]);
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
       const layout = machines().find(k => k.name === m)?.layout;
@@ -386,10 +401,10 @@ export default class Spaces extends View {
         || spaces().some(s => (s.machine ?? null) === m && !this.shown.has(s.id));
     };
     const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
-    if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : rows.map(draw);
+    if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : block(null);
     const machineNames = [null, ...remote];
     return machineNames.flatMap((m) => {
-      const mine = rows.filter((r) => (r.w.machine ?? null) === m);
+      const mine = block(m);
       const repair = this.reconnecting[m];
       const machine = this.machines.find(k => k.name === m) ?? repair?.machine;
       const connected = !m || machine?.state === "connected";
@@ -421,8 +436,83 @@ export default class Spaces extends View {
         .on_click(() => run("space.new", { machine: m ?? "" }))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
       if (!collapsed && rebuilt) return [head];
-      return [head, ...(folded ? [] : mine.length ? mine.map(draw) : [loading(m) ? loadingRow(m) : empty])];
+      const none = !rows.some((r) => (r.w.machine ?? null) === m);
+      return [head, ...(folded ? [] : none ? [loading(m) ? loadingRow(m) : empty, ...mine] : mine)];
     });
+  }
+
+  // A press without a move folds or unfolds it; dragged onto another header it
+  // moves the group. In the rail it shows only its dot.
+  groupHead({ head, size }, members, t, collapsed) {
+    const folded = this.groupsFolded.has(head.id);
+    const dot = groupDot(members.map(r => r.w.status), members.flatMap(r => this.lanes[r.w.id]?.strips.map(s => s.state) ?? []));
+    const target = { kind: "head", id: head.id };
+    const hovered = this.overHead === head.id;
+    const moving = hovered && this.pressedHead !== null && this.pressedHead !== head.id;
+    const order = moving ? readGroups(shared("space.groups")).map(g => g.id) : [];
+    const down = order.indexOf(this.pressedHead) < order.indexOf(head.id);
+    return h_flex().relative().id(`group-${head.id}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
+      .when(collapsed, el => el.justify_center())
+      .cursor_pointer().hover(s => s.bg(t.hover))
+      .when(this.pressedHead === head.id && !hovered, el => el.opacity(0.5))
+      .when(hovered && this.pressed !== null, el => el.child(this.outline(t)))
+      .when(moving, el => el.child(div().absolute().left(0).right(0).h(2).bg(t.accent)
+        .when(down, line => line.bottom(0)).when(!down, line => line.top(0))))
+      .on_mouse_down("left", () => {
+        this.endDrag();
+        this.pressedHead = head.id;
+        this.overHead = head.id;
+      })
+      .on_mouse_move((_e, cx) => {
+        if (this.pressed === null && this.pressedHead === null) return;
+        if (this.pressedHead !== null && this.pressedHead !== head.id) this.strayed = true;
+        const over = this.pressedHead === head.id || this.landing(target) !== null ? head.id : null;
+        if (this.overHead !== over || this.over !== null) {
+          this.overHead = over;
+          this.over = null;
+          cx.notify();
+        }
+      })
+      .on_mouse_up("left", (_e, cx) => {
+        const fold = this.pressedHead === head.id && this.overHead === head.id && !this.strayed;
+        const next = this.overHead === head.id && !fold ? this.landing(target) : null;
+        this.endDrag();
+        if (fold) {
+          folded ? this.groupsFolded.delete(head.id) : this.groupsFolded.add(head.id);
+          localStorage.setItem("groups.folded", JSON.stringify([...this.groupsFolded]));
+        }
+        if (next) setShared("space.groups", next);
+        cx.notify();
+      })
+      .when(!collapsed, el => el.child(h_flex().flex_1().min_w(0)
+          .child(div().id(`group-name-${head.id}`).min_w(0).truncate().hover(s => s.text_color(t.foreground))
+            .on_click((_e, cx) => { cx.stop_propagation(); this.endDrag(); this.nameGroup(head); }).child(head.name)))
+        .child(div().flex_none().child(String(size))))
+      .when(dot !== null, el => el.child(div().size(6).rounded(3).flex_none().bg(tone(t, dot))))
+      .when(!collapsed, el => el.child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
+  }
+
+  // What releasing the current drag on `target` would store, or null.
+  landing(target) {
+    const groups = readGroups(shared("space.groups"));
+    if (this.pressedHead !== null) return drop(groups, { kind: "group", id: this.pressedHead }, target, { from: null });
+    const w = spaces().find(s => s.id === this.pressed);
+    if (!w || !this.source) return null;
+    return drop(groups, { kind: "space", id: w.id, machine: w.machine ?? null, worktree: this.source.worktree }, target, { from: this.source.group });
+  }
+
+  endDrag() {
+    this.pressed = null;
+    this.source = null;
+    this.over = null;
+    this.pressedHead = null;
+    this.overHead = null;
+    this.strayed = false;
+  }
+
+  // Marks where a dragged space would join or leave a group.
+  outline(t) {
+    return div().absolute().top(0).bottom(0).left(0).right(0).rounded(8).border(2).border_color(t.accent);
   }
 
   // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
@@ -447,7 +537,7 @@ export default class Spaces extends View {
       .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
 
-  row({ w, i, g, tree }, t) {
+  row({ w, i, g, tree, group = null }, t) {
     const on = w.active;
     const fromIndex = this.pressed === null ? -1 : spaces().findIndex(s => s.id === this.pressed);
     const colors = shared("space.colors") ?? {};
@@ -455,6 +545,10 @@ export default class Spaces extends View {
     const fill = color.startsWith("#") ? color : (MARK[color] ?? t[color]);
     const lane = this.lanes[w.id];
     const extra = laneHeight(lane);
+    const target = { kind: "row", id: w.id, machine: w.machine ?? null, group };
+    // Within one container a drop reorders; across one it can only leave a group.
+    const reorders = () => this.source?.group === group;
+    const aimed = this.pressed !== null && this.over === w.id && this.pressed !== w.id;
     return v_flex()
       .relative()
       .id(`space-${w.id}`)
@@ -466,32 +560,47 @@ export default class Spaces extends View {
       .when(on, (el) => el.bg(t.selected))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
       .when(this.pressed === w.id && this.over !== w.id, (el) => el.opacity(0.5))
-      .when(this.pressed !== null && this.over === w.id && this.pressed !== w.id, (el) => el.child(
+      .when(aimed && reorders(), (el) => el.child(
         div().absolute().left(0).right(0).h(2).bg(t.accent)
           .when(fromIndex < i, line => line.bottom(0))
           .when(fromIndex > i, line => line.top(0)),
       ))
+      .when(aimed && !reorders(), (el) => el.child(this.outline(t)))
       .on_mouse_down("left", () => {
+        this.endDrag();
         this.pressed = w.id;
+        this.source = { group, worktree: Boolean(tree) };
         this.over = w.id;
       })
       .on_mouse_move((_e, cx) => {
+        if (this.pressed === null) {
+          if (this.pressedHead !== null) this.strayed = true;
+          if (this.overHead !== null) {
+            this.overHead = null;
+            cx.notify();
+          }
+          return;
+        }
         const source = spaces().find(s => s.id === this.pressed);
-        const over = source && (source.machine ?? null) === (w.machine ?? null) ? w.id : null;
-        if (this.pressed !== null && this.over !== over) {
+        const mine = source && (source.machine ?? null) === (w.machine ?? null);
+        const over = mine && (reorders() || this.landing(target) !== null) ? w.id : null;
+        if (this.over !== over || this.overHead !== null) {
           this.over = over;
+          this.overHead = null;
           cx.notify();
         }
       })
       .on_mouse_up("left", (_e, cx) => {
         const from = this.pressed;
-        const over = this.over;
-        this.pressed = null;
-        this.over = null;
-        if (from !== null && over === w.id && from !== w.id) {
+        const dropped = from !== null && this.over === w.id && from !== w.id;
+        const move = dropped && reorders();
+        const next = dropped && !move ? this.landing(target) : null;
+        this.endDrag();
+        if (move) {
           const index = spaces().findIndex(s => s.id === w.id);
           if (index !== -1) run("space.move", { id: from, index: index + 1 });
-        } else if (from === w.id) run("space.select", { id: w.id });
+        } else if (next) setShared("space.groups", next);
+        else if (from === w.id) run("space.select", { id: w.id });
         cx.notify();
       })
       .on_mouse_down("right", () => this.menu(w))
@@ -556,6 +665,12 @@ export default class Spaces extends View {
       .text_color(t[p.color] ?? t.muted).child(p.text);
   }
 
+  // No group: makes one. A group: renames or deletes it.
+  nameGroup(group) {
+    openOverlay({ mod: "factory-prompt", kind: "dialog", modal: true, width: 420, height: 220,
+      props: group ? { group: { id: group.id, name: group.name } } : {} });
+  }
+
   // The strip shows its run's first question, so Answer answers that one.
   answer(id) {
     const r = this.factory.kind === "ok" ? this.factory.runs.find((r) => r.id === id) : null;
@@ -595,13 +710,19 @@ export default class Spaces extends View {
       changed = true;
     }
     if (changed) setShared("space.colors", kept);
+    const loaded = new Set(machines().filter(m => m.layout === "ready").map(m => m.name));
+    const groups = prune(readGroups(shared("space.groups")), ids, loaded);
+    if (groups.changed) setShared("space.groups", groups.groups);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
-        .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
-          .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14))))
+        .child(h_flex().flex_none().gap(2)
+          .when(!collapsed, el => el.child(div().id("group-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
+            .tooltip("New group").on_click(() => this.nameGroup(null)).child(svg("mods/workspace-chrome/folder-plus.svg").size(14))))
+          .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
+            .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14)))))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
-        .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
+        .on_mouse_up("left", (_e, cx) => { this.endDrag(); cx.notify(); })
         .children(this.grouped(t, collapsed)));
   }
 }

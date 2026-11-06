@@ -24,7 +24,7 @@
 
 A slice is `pending → building → done`, or `blocked` while it waits on the owner.
 
-**Build order:** _(state it here when more than one feature is live, and say why — shared files, migration risk, whichever ships second eats the merge.)_
+**Build order:** 001 factory-cockpit, then 002 space-groups. Both change the cloned spaces mod `factory-spaces`, which 001 creates, and 002 amends 001 FR-2's screenshot acceptance. 001 itself waits on factory's structured status fields (factory idea `2026-11-06-feed-a-herdr-app-cockpit-from-factory-status`). `feat/space-groups` is stacked on `feat/factory-cockpit`.
 
 **Retired numbers — never reused:** _(none yet)_
 

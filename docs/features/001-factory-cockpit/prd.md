@@ -76,7 +76,9 @@ The repo records the `herdr-app --version` and the `installed.json` hash of `spa
 
 **Accepted cost:** every Herdr release that changes the spaces mod means a manual re-clone and re-apply of the strip. A separate Runs block lost because the owner wants the run on its space row.
 
-**Acceptance**: with no factory run anywhere, the factory layout draws the sidebar exactly as Herdr's `main` does, compared by screenshot. With a recorded hash that differs from `installed.json`, `install.sh` prints a warning naming the recorded and the running herdr-app version, and still installs.
+**Acceptance**: with no factory run anywhere, the factory layout draws the sidebar exactly as Herdr's `main` does, compared by screenshot.
+
+*Amended 2026-11-06 by PRD-002: once space groups ship, the Spaces header also holds the new-group control. The comparison then allows that one control.* With a recorded hash that differs from `installed.json`, `install.sh` prints a warning naming the recorded and the running herdr-app version, and still installs.
 
 ## 6. FR-3 — one call, mapped to spaces
 
