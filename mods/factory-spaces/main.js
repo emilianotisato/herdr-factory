@@ -72,6 +72,7 @@ export default class Spaces extends View {
     this.over = null;
     this.pressedHead = null; // the group whose header is being dragged
     this.overHead = null;
+    this.strayed = false; // the dragged header has left its own row
     this.machines = [];
     this.reconnecting = JSON.parse(localStorage.getItem("machines.reconnecting") ?? "{}");
     for (const state of Object.values(this.reconnecting)) state.busy = false;
@@ -435,7 +436,8 @@ export default class Spaces extends View {
         .on_click(() => run("space.new", { machine: m ?? "" }))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
       if (!collapsed && rebuilt) return [head];
-      return [head, ...(folded ? [] : mine.length ? mine : [loading(m) ? loadingRow(m) : empty])];
+      const none = !rows.some((r) => (r.w.machine ?? null) === m);
+      return [head, ...(folded ? [] : none ? [loading(m) ? loadingRow(m) : empty, ...mine] : mine)];
     });
   }
 
@@ -457,11 +459,13 @@ export default class Spaces extends View {
       .when(moving, el => el.child(div().absolute().left(0).right(0).h(2).bg(t.accent)
         .when(down, line => line.bottom(0)).when(!down, line => line.top(0))))
       .on_mouse_down("left", () => {
+        this.endDrag();
         this.pressedHead = head.id;
         this.overHead = head.id;
       })
       .on_mouse_move((_e, cx) => {
         if (this.pressed === null && this.pressedHead === null) return;
+        if (this.pressedHead !== null && this.pressedHead !== head.id) this.strayed = true;
         const over = this.pressedHead === head.id || this.landing(target) !== null ? head.id : null;
         if (this.overHead !== over || this.over !== null) {
           this.overHead = over;
@@ -470,7 +474,7 @@ export default class Spaces extends View {
         }
       })
       .on_mouse_up("left", (_e, cx) => {
-        const fold = this.pressedHead === head.id && this.overHead === head.id;
+        const fold = this.pressedHead === head.id && this.overHead === head.id && !this.strayed;
         const next = this.overHead === head.id && !fold ? this.landing(target) : null;
         this.endDrag();
         if (fold) {
@@ -503,6 +507,7 @@ export default class Spaces extends View {
     this.over = null;
     this.pressedHead = null;
     this.overHead = null;
+    this.strayed = false;
   }
 
   // Marks where a dragged space would join or leave a group.
@@ -562,12 +567,14 @@ export default class Spaces extends View {
       ))
       .when(aimed && !reorders(), (el) => el.child(this.outline(t)))
       .on_mouse_down("left", () => {
+        this.endDrag();
         this.pressed = w.id;
         this.source = { group, worktree: Boolean(tree) };
         this.over = w.id;
       })
       .on_mouse_move((_e, cx) => {
         if (this.pressed === null) {
+          if (this.pressedHead !== null) this.strayed = true;
           if (this.overHead !== null) {
             this.overHead = null;
             cx.notify();

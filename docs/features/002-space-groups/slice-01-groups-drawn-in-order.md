@@ -87,3 +87,8 @@ All line numbers are `mods/factory-spaces/main.js` on `main` after PRD-001 (the 
 - **FR-1, closed ids**: close a grouped space with `herdr-app do`, read `shared.json` back within 2 s.
 
 **Acceptance:** after the checkpoint, each row has its transcript or PNG in this slice's Progress.
+
+**Code-review fixes (2026-11-06).**
+- `arrange()` put every machine's loose spaces ahead of every group, so with a remote machine holding spaces, a grouped local space was aimed past the remote block. `space.move` stays inside its machine's block (`~/.config/herdr-app/AGENTS.md`, "space order"), so the order loop never settled. It sent `space.move` about once a second, and could swap remote spaces back and forth on each render. The checkpoints had no remote machine, so this never ran there. Now `arrange()` works one machine block at a time: that machine's loose spaces, then its groups. Tests: "each machine's spaces stay in that machine's block", and "an arranged order arranges to itself" now arranges its own output again instead of comparing it to its input.
+- A machine block that held only empty group headers counted as non-empty, so its "New space there" row and its loading row went missing. Now they show whenever the machine has no space rows, with its group headers drawn under them (`grouped()`, `main.js`).
+- The worktree test now also checks that worktrees carry their checkout's group, which is what the fold and the dot read.

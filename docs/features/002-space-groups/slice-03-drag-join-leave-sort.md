@@ -63,3 +63,8 @@ Line numbers are `mods/factory-spaces/main.js` on `main` after PRD-001; slices 0
 - **FR-3**: run the order unit tests; with `globex` moved above `acme` in the store, `herdr-app ls` against the drawn order; restart, `ls` again; `bin/input.sh click` on a header folds it. The header drag is the owner's, in `qa-guide.md`.
 
 **Acceptance:** after the checkpoint, each row has its transcript or PNG in this slice's Progress.
+
+**Code-review fixes (2026-11-06).**
+- A header drag let go outside the list (on the Spaces title bar, another pane, or outside the window) left `pressedHead` set. The next space drag then read as a header drag and moved a group instead of the space. Now every press on a row or a header clears any earlier drag first (`endDrag()`).
+- A header dragged away and back onto itself folded on release. Now it folds only if the press never left its own header (`strayed`), which is what "a press on a header without a move" means.
+- `drop()` tests added for gaps the second opinion found: every group's name and machine survive a drop, a space listed in two groups leaves both when it joins or leaves, and a space on another machine joins that machine's group.

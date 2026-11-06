@@ -57,6 +57,10 @@ test("a member's worktrees follow it into the group", () => {
     [group("acme", ["main"])],
   );
   assert.deepEqual(drawn(items), ["loose", "[acme:3]", "main", "wt1", "wt2"]);
+  assert.deepEqual(
+    items.map((it) => ("head" in it ? "head" : it.group)),
+    [null, "head", "acme", "acme", "acme"],
+  );
 });
 
 test("a worktree listed on its own is not a member", () => {
@@ -77,16 +81,45 @@ test("a space on another machine than its group stays loose", () => {
     [unit("a", [], "box"), unit("b", [], "box")],
     [group("here", ["a"]), group("there", ["b"], "box")],
   );
-  assert.deepEqual(drawn(items), ["a", "[here:0]", "[there:1]", "b"]);
+  assert.deepEqual(drawn(items), ["a", "[there:1]", "b", "[here:0]"]);
+});
+
+test("each machine's spaces stay in that machine's block", () => {
+  const units = [
+    unit("l1"),
+    unit("l2"),
+    unit("r1", [], "box"),
+    unit("r2", [], "box"),
+  ];
+  const groups = [group("acme", ["l1"]), group("there", ["r1"], "box")];
+  assert.deepEqual(drawn(arrange(units, groups)), [
+    "l2",
+    "[acme:1]",
+    "l1",
+    "r2",
+    "[there:1]",
+    "r1",
+  ]);
 });
 
 test("an arranged order arranges to itself", () => {
-  const units = [unit("a"), unit("b"), unit("g1"), unit("g2")];
-  const items = arrange(units, [group("acme", ["g1", "g2"])]);
-  assert.deepEqual(
-    drawn(items).filter((x) => !x.startsWith("[")),
-    ["a", "b", "g1", "g2"],
+  const groups = [group("acme", ["g1", "g2"]), group("box", ["r"], "box")];
+  const first = arrange(
+    [
+      unit("g2"),
+      unit("a"),
+      unit("r", [], "box"),
+      unit("g1"),
+      unit("s", [], "box"),
+    ],
+    groups,
   );
+  const settled = first
+    .filter((it) => !("head" in it))
+    .map((it) =>
+      unit(it.row, [], it.row === "r" || it.row === "s" ? "box" : null),
+    );
+  assert.deepEqual(drawn(arrange(settled, groups)), drawn(first));
 });
 
 test("closed spaces are pruned from their groups", () => {
@@ -205,6 +238,40 @@ test("a space dropped on another group's header leaves its own group", () => {
   const groups = [group("acme", ["a", "b"]), group("globex", ["c"])];
   const next = drop(groups, space("a"), head("globex"), { from: "acme" });
   assert.deepEqual(members(next), { acme: ["b"], globex: ["c", "a"] });
+});
+
+test("a drop keeps every group's name and machine", () => {
+  const groups = [group("acme", ["a"]), group("globex", [], "box")];
+  const next = drop(groups, space("a"), rowOf("loose"), { from: "acme" });
+  assert.deepEqual(
+    next.map(({ id, name, machine }) => [id, name, machine]),
+    [
+      ["acme", "acme", null],
+      ["globex", "globex", "box"],
+    ],
+  );
+});
+
+test("a space listed in two groups leaves both when it joins or leaves", () => {
+  const groups = [
+    group("acme", ["a", "b"]),
+    group("globex", ["a"]),
+    group("initech", []),
+  ];
+  assert.deepEqual(
+    members(drop(groups, space("a"), head("initech"), { from: "acme" })),
+    { acme: ["b"], globex: [], initech: ["a"] },
+  );
+  assert.deepEqual(
+    members(drop(groups, space("a"), rowOf("loose"), { from: "acme" })),
+    { acme: ["b"], globex: [], initech: [] },
+  );
+});
+
+test("a space on another machine joins that machine's group", () => {
+  const groups = [group("there", [], "box")];
+  const next = drop(groups, space("r", "box"), head("there"), { from: null });
+  assert.deepEqual(members(next), { there: ["r"] });
 });
 
 test("a grouped space dropped on a loose row leaves its group", () => {

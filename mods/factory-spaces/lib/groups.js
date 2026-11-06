@@ -1,5 +1,6 @@
 // The owner's space groups, stored in `shared("space.groups")`, and the order
-// the sidebar draws spaces in: loose spaces first, then each group in list order.
+// the sidebar draws spaces in: per machine, loose spaces first, then each group
+// in list order.
 
 /**
  * @typedef {{ id: string, name: string, machine: string | null, spaces: string[] }} Group
@@ -65,9 +66,10 @@ export function prune(groups, live, loaded) {
 }
 
 /**
- * The drawn sequence. A space listed in two groups is in the first; one listed
- * in a group of another machine stays loose. Worktrees are never members
- * themselves: they go where their checkout goes.
+ * The drawn sequence, machine by machine in the order the units list them:
+ * each machine's loose spaces, then its groups. A space listed in two groups is
+ * in the first; one listed in a group of another machine stays loose. Worktrees
+ * are never members themselves: they go where their checkout goes.
  * @template R
  * @param {Unit<R>[]} units in the current order
  * @param {Group[]} groups
@@ -93,14 +95,25 @@ export function arrange(units, groups) {
     out.push({ row: u.row, group });
     for (const k of u.kids) out.push({ row: k, group });
   };
-  for (const { u, group } of tagged) if (group === null) push(u, null);
-  for (const g of groups) {
-    const members = tagged.filter((x) => x.group === g.id);
-    out.push({
-      head: g,
-      size: members.reduce((n, { u }) => n + 1 + u.kids.length, 0),
-    });
-    for (const { u } of members) push(u, g.id);
+  // `space.move` cannot take a space out of its machine's block of the core order.
+  const blocks = [
+    ...new Set([
+      ...units.map((u) => u.machine),
+      ...groups.map((g) => g.machine),
+    ]),
+  ];
+  for (const m of blocks) {
+    for (const { u, group } of tagged)
+      if (group === null && u.machine === m) push(u, null);
+    for (const g of groups) {
+      if (g.machine !== m) continue;
+      const members = tagged.filter((x) => x.group === g.id);
+      out.push({
+        head: g,
+        size: members.reduce((n, { u }) => n + 1 + u.kids.length, 0),
+      });
+      for (const { u } of members) push(u, g.id);
+    }
   }
   return out;
 }
