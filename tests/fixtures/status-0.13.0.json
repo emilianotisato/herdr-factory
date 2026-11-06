@@ -1,0 +1,531 @@
+{
+  "schema": 1,
+  "factory": "0.13.0",
+  "runs": [
+    {
+      "id": "019-20261106-a001",
+      "feature": "019",
+      "phase": "building",
+      "line": "019 \u00b7 building",
+      "owner": [],
+      "questions": [],
+      "board": ["019 \u00b7 building"],
+      "repo": "/fixtures/alpha",
+      "branch": "feat/019",
+      "slug": "platform-runtime",
+      "title": "Platform runtime",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "020-20261106-a002",
+      "feature": "020",
+      "phase": "waiting-owner",
+      "line": "020 \u00b7 waiting-owner",
+      "owner": ["BLOCK-1 open: Which index?"],
+      "questions": [
+        {
+          "id": "BLOCK-1",
+          "at": "slice",
+          "n": 2,
+          "text": "Which index keeps the soft delete?",
+          "answer": ["factory", "answer", "--feature", "020", "BLOCK-1"]
+        }
+      ],
+      "board": ["020 \u00b7 waiting-owner"],
+      "repo": "/fixtures/alpha",
+      "branch": "feat/020",
+      "slug": "feature-020",
+      "title": "Feature 020",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "blocked"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "021-20261106-b001",
+      "feature": "021",
+      "phase": "paused",
+      "line": "021 \u00b7 paused",
+      "owner": [],
+      "questions": [],
+      "board": ["021 \u00b7 paused"],
+      "repo": "/fixtures/beta",
+      "branch": "feat/021",
+      "slug": "feature-021",
+      "title": "Feature 021",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": "2026-11-06T20:30:00Z",
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "022-20261106-b002",
+      "feature": "022",
+      "phase": "building",
+      "line": "022 \u00b7 building",
+      "owner": ["parked: budget"],
+      "questions": [],
+      "board": ["022 \u00b7 building"],
+      "repo": "/fixtures/beta",
+      "branch": "feat/022",
+      "slug": "feature-022",
+      "title": "Feature 022",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 30000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": "budget",
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "023-20261106-b003",
+      "feature": "023",
+      "phase": "building",
+      "line": "023 \u00b7 building",
+      "owner": ["driver dead; run: factory run 023"],
+      "questions": [],
+      "board": ["023 \u00b7 building"],
+      "repo": "/fixtures/beta",
+      "branch": "feat/023",
+      "slug": "feature-023",
+      "title": "Feature 023",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 0,
+        "lastGate": "red"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": true,
+      "stopped": false
+    },
+    {
+      "id": "024-20261105-a003",
+      "feature": "024",
+      "phase": "finished",
+      "line": "024 \u00b7 finished",
+      "owner": [],
+      "questions": [],
+      "board": ["024 \u00b7 finished"],
+      "repo": "/fixtures/alpha",
+      "branch": "feat/024",
+      "slug": "feature-024",
+      "title": "Feature 024",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "done"
+        },
+        {
+          "n": 5,
+          "status": "done"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": "https://github.com/example/alpha/pull/100",
+      "ci": "green",
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "025-20261105-b004",
+      "feature": "025",
+      "phase": "failed",
+      "line": "025 \u00b7 failed",
+      "owner": [],
+      "questions": [],
+      "board": ["025 \u00b7 failed"],
+      "repo": "/fixtures/beta",
+      "branch": "feat/025",
+      "slug": "feature-025",
+      "title": "Feature 025",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "026-20261106-c001",
+      "feature": "026",
+      "phase": "building",
+      "line": "026 \u00b7 building",
+      "owner": [],
+      "questions": [],
+      "board": ["026 \u00b7 building"],
+      "repo": "/fixtures/orphan",
+      "branch": "feat/026",
+      "slug": null,
+      "title": null,
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": null,
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    },
+    {
+      "id": "027-20261104-b005",
+      "feature": "027",
+      "phase": "finished",
+      "line": "027 \u00b7 finished",
+      "owner": [],
+      "questions": [],
+      "board": ["027 \u00b7 finished"],
+      "repo": "/fixtures/beta",
+      "branch": "feat/027",
+      "slug": "feature-027",
+      "title": "Feature 027",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "building"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 0,
+        "lastGate": "red"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": true
+    },
+    {
+      "id": "028-20261106-a004",
+      "feature": "028",
+      "phase": "building",
+      "line": "028 \u00b7 building",
+      "owner": [],
+      "questions": [],
+      "board": ["028 \u00b7 building"],
+      "repo": "/fixtures/alpha",
+      "branch": "feat/028",
+      "slug": "feature-028",
+      "title": "Feature 028",
+      "startedAt": "2026-11-06T12:00:00Z",
+      "updatedAt": "2026-11-06T13:02:00Z",
+      "elapsedSeconds": 3720,
+      "seq": 12,
+      "slices": [
+        {
+          "n": 1,
+          "status": "done"
+        },
+        {
+          "n": 2,
+          "status": "done"
+        },
+        {
+          "n": 3,
+          "status": "done"
+        },
+        {
+          "n": 4,
+          "status": "pending"
+        },
+        {
+          "n": 5,
+          "status": "pending"
+        },
+        {
+          "n": 6,
+          "status": "pending"
+        },
+        {
+          "n": 7,
+          "status": "pending"
+        },
+        {
+          "n": 8,
+          "status": "pending"
+        },
+        {
+          "n": 9,
+          "status": "pending"
+        },
+        {
+          "n": 10,
+          "status": "pending"
+        }
+      ],
+      "budget": {
+        "used": 12000000,
+        "limit": 30000000
+      },
+      "checkpoints": {
+        "done": 1,
+        "lastGate": "green"
+      },
+      "pr": null,
+      "ci": null,
+      "pausedUntil": null,
+      "parked": null,
+      "driverDead": false,
+      "stopped": false
+    }
+  ]
+}

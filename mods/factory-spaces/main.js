@@ -5,7 +5,8 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout } from "herdr";
+import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, props, home } from "herdr";
+import { NONE, TOO_OLD, STRIP_HEIGHT, TOO_OLD_HEIGHT, bySpace, laneHeight, readStatus, urgent } from "./lib/runs.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -31,6 +32,8 @@ const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 // Changes made outside Herdr (an editor's save, a commit in another app): looked
 // for this often, in repos the list shows, while the window is in front.
 const FALLBACK = 60000;
+// factory's runs: asked this often while the window is in front, and at once when its runs folder changes.
+const RUNS_EVERY = 10000;
 
 // What a stored color name looks like on an avatar (the same in every mod
 // that draws space avatars): one strong color per hue, light and dark alike.
@@ -47,7 +50,7 @@ export function tone(t, status) {
 
 export default class Spaces extends View {
   init(_props, cx) {
-    this.git = {}; // where() -> { name, branch, ahead, behind, repo, linked }, null: not a repo
+    this.git = {}; // where() -> { name, branch, ahead, behind, repo, top, linked }, null: not a repo
     this.checked = {}; // where() -> when it was last looked at
     this.unsure = new Set(); // where()s git couldn't answer for (a machine away)
     this.pending = new Set(); // where()s to look at next
@@ -70,6 +73,34 @@ export default class Spaces extends View {
     // `git status` walks the whole tree, on another machine a process there:
     // only when its answer could have changed (see `due`).
     cx.timer.every(250, (cx) => this.checkNew(cx));
+    this.factory = NONE;
+    this.lanes = {}; // space -> what factory shows under it
+    this.askRuns(cx);
+    cx.timer.every(RUNS_EVERY, (cx) => { if (window().active) this.askRuns(cx); });
+    this.watchRuns(cx);
+  }
+
+  // One call at a time; asked again meanwhile, it asks once more after.
+  askRuns(cx) {
+    if (this.asking) { this.askAgain = true; return; }
+    this.asking = true;
+    const command = props()?.factory ?? "factory";
+    cx.spawn(async (cx) => {
+      do {
+        this.askAgain = false;
+        this.factory = await readStatus((args) => exec(command, args));
+      } while (this.askAgain);
+      this.asking = false;
+      cx.notify();
+    });
+  }
+
+  // Without the folder (factory never ran here), the timer is all there is.
+  watchRuns(cx) {
+    const dir = props()?.runs ?? `${home()}/.local/share/factory/runs`;
+    cx.spawn(async (cx) => {
+      try { for (;;) { await watchFolder(dir); this.askRuns(cx); } } catch {}
+    });
   }
 
   checkNew(cx) {
@@ -213,7 +244,7 @@ export default class Spaces extends View {
       const common = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd, on });
       const repo = common.stdout.trim();
       const name = repo.endsWith("/.git") ? base(repo.slice(0, -5)) : base(repo).replace(/\.git$/, "");
-      const info = { name, branch: null, ahead: 0, behind: 0, repo: JSON.stringify([on, repo]), linked: repo !== `${top.stdout.trim()}/.git` };
+      const info = { name, branch: null, ahead: 0, behind: 0, repo: JSON.stringify([on, repo]), top: top.stdout.trim(), linked: repo !== `${top.stdout.trim()}/.git` };
       for (const line of r.stdout.split("\n")) {
         if (line.startsWith("# branch.head ")) info.branch = line.slice(14);
         else if (line.startsWith("# branch.ab ")) {
@@ -298,6 +329,8 @@ export default class Spaces extends View {
   // The rows, under a header per machine once one isn't this computer.
   grouped(t, collapsed) {
     const rows = this.ordered();
+    // factory's runs are on this computer: a space on another machine has none.
+    this.lanes = bySpace(this.factory, rows.map(({ w, g }) => ({ id: w.id, top: !w.machine && g ? g.top : null, repo: !w.machine && Boolean(g) })));
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
@@ -373,11 +406,13 @@ export default class Spaces extends View {
     const colors = shared("space.colors") ?? {};
     const color = colors[w.id] ?? "ansi6";
     const fill = color.startsWith("#") ? color : (MARK[color] ?? t[color]);
+    const lane = this.lanes[w.id];
+    const extra = laneHeight(lane);
     return v_flex()
       .relative()
       .id(`space-${w.id}`)
       .px(8)
-      .h(rowHeight({ tree }))
+      .h(rowHeight({ tree }) + extra)
       .flex_none()
       .justify_center()
       .rounded(8)
@@ -415,13 +450,49 @@ export default class Spaces extends View {
       .on_mouse_down("right", () => this.menu(w))
       .child(
         h_flex()
+          .h(rowHeight({ tree }))
+          .flex_none()
           .gap(9)
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
           .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...w.name][0]?.toUpperCase() ?? "?")))
           .child(div().flex_shrink(0).max_w(150).truncate().text_color(t.foreground).child(w.name))
           .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1()),
-      );
+      )
+      .when(extra > 0, (el) => el.child(this.lane(lane, tree, t)));
+  }
+
+  // Under the name, lined up with it: one strip per run, or the too-old line.
+  lane(lane, tree, t) {
+    const box = v_flex().flex_none().pl(tree ? 44 : 27).text_size(11.5);
+    if (lane.old) return box.child(div().h(TOO_OLD_HEIGHT).flex_none().truncate().text_color(t.dim).child(TOO_OLD));
+    return box.children(lane.strips.map((s) => this.strip(s, t)));
+  }
+
+  strip(s, t) {
+    const line = (parts) => h_flex().h(15).flex_none().min_w(0).gap(5).items_center().children(parts.map((p) => this.part(p, t)));
+    return v_flex()
+      .id(`run-${s.id}`)
+      .h(STRIP_HEIGHT)
+      .flex_none()
+      .justify_center()
+      .gap(2)
+      .when(Boolean(s.title), (el) => el.tooltip(s.title))
+      .child(line(s.first).when(s.gate !== null || s.gauge !== null, (el) => el.child(h_flex().flex_none().gap(5).items_center()
+        .when(s.gate !== null, (el) => el.child(div().size(6).rounded(3).flex_none().bg(t[s.gate])))
+        .when(s.gauge !== null, (el) => el.child(div().w(28).h(3).rounded(2).flex_none().bg(t.hover)
+          .child(div().h_full().w(Math.round(28 * s.gauge)).rounded(2).bg(t[s.gaugeColor])))))))
+      .child(line(s.second));
+  }
+
+  part(p, t) {
+    if (p.kind === "bar") {
+      return h_flex().flex_1().min_w(30).gap(2).items_center().when(p.dim, (el) => el.opacity(0.4))
+        .children(p.colors.map((c) => div().flex_1().max_w(14).h(4).rounded(2).bg(t[c])));
+    }
+    if (p.kind === "control") return div().flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted).child(p.text);
+    return div().when(Boolean(p.fill), (el) => el.flex_1().min_w(0).truncate()).when(!p.fill, (el) => el.flex_none())
+      .text_color(t[p.color] ?? t.muted).child(p.text);
   }
 
   compact({ w, i }, t) {
@@ -435,6 +506,7 @@ export default class Spaces extends View {
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("space.select", { id: w.id }))
       .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
+      .when(urgent(this.lanes[w.id]) !== null, (el) => el.child(div().size(6).rounded(3).flex_none().bg(t[urgent(this.lanes[w.id])])))
       .child(div().text_color(tone(t, w.status)).child(glyph(w.status)));
   }
 

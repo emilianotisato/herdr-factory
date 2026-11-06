@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §3 (the fields), §6 FR-3, §7 FR-4. **Depends on**: 02 (it edits the `factory-spaces` clone 02 creates)
 **Created**: 2026-11-06
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `mods/factory-spaces/lib/runs.js` (envelope parse, the 0.13.0 version check, `readStatus` asking again without `--recent` when factory refuses it, mapping by top level, the seven states, the strip parts, lane heights, the rail dot's color), covered by `tests/runs.test.js` (26 tests, lib at 100% lines, 94.8% branches) over `tests/fixtures/status-0.13.0.json` and `status-0.12.0.json`. In `main.js`: `check()` keeps `top`; one `factory status` call at a time, at start, every 10 s while the window is active, and after each `watchFolder` batch on the runs folder; `row()` grows by 34 px per run (18 for the too-old line) with the name line kept at its old height, so the drag's accent line still lands on the row's top or bottom edge; `compact()` draws the dot after the number. Answer and × are inert labels.
+- Inner loop: 3 runs, 1 red, about 2 min. The red run caught strict-type errors in the lib (untyped lookup tables, a `fill` spread onto the `Part` union).
+- Deviations: AD-3 (state precedence follows factory's own status line; stopped counts as failed), AD-4 (too old is read from a second call without `--recent`, since 0.12.0 refuses the flag), AD-5 (`runs` layout prop for the watched folder, `decide`). Strips list most urgent first.
+- Left for the checkpoint: Prove rows FR-3 and FR-4 (PNGs, timing, human look).
 
 **Slice**: Each repo's space row shows its factory runs: one strip per run, in every state of FR-4's table, light and dark, with the narrow-rail dot. The data comes from one `factory status --json --recent` call per tick, mapped to spaces by git top level. Alerts, the Answer dialog and dismissing are slices 04 and 05; this slice draws the Answer and × controls as inert placeholders only where the table shows them, or leaves them out.
 
