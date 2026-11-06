@@ -1,5 +1,5 @@
-version = "0.12.0"
-bundle = "c08b2ca9c93437781e0f9912532175fdcc1e6c43958ede6a65e9a1f36263692f"
+version = "0.13.0"
+bundle = "47cffb70cb9ab1b41b304ba24fdb67822d95bb06b9fe0cb36c1c76d626b62925"
 
 [files]
 "_shared/models.md" = "73c90e50f81c1b1f0018333af56ae207af4c755338805cad8cd4d560e0583a6c"
@@ -15,7 +15,7 @@ bundle = "c08b2ca9c93437781e0f9912532175fdcc1e6c43958ede6a65e9a1f36263692f"
 "harness/references/skill-template.md" = "17d3ea877ad9bec8a7ff487052d4a9268ce167a084f2ca88383273c07f45ed0b"
 "harvest/SKILL.md" = "5db46882d7a04f472acd62b8bdab84226691462094468afbdadc9bedf22f2a7e"
 "lanes/SKILL.md" = "cc859b1c9a7a540f5bc6c8784b7fa0ef8ad0f7ad49f3bfc0530577fffb73850b"
-"polish/SKILL.md" = "7a31bbdcb15ebb3b3d6fdb89211bff04519c24ad8b1db3a875cb2d78693dd88a"
+"polish/SKILL.md" = "771adbb595a4f63b441e2e56a4eb8c8d7c539746634488f1b7db54fff38c9c0d"
 "prd/SKILL.md" = "583c295ed562fa90977f4b4ce192f5cb924fed6c2c95b79d79f1b3d6b2f699da"
 "prune/SKILL.md" = "7ad0416de57a81eaa0cac9d24be28cbd6c251ec3f32cd082bb767583bf9423d4"
 "prune/references/adapters.md" = "72635d66334d0cf999069aad4a418d031a6684dddef08f878bf192545a1584a0"

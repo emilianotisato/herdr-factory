@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "factory": "0.12.0",
+  "runs": [
+    {
+      "id": "019-20261106-a001",
+      "feature": "019",
+      "phase": "building",
+      "line": "019 \u00b7 building",
+      "owner": [],
+      "board": ["019 \u00b7 building"]
+    },
+    {
+      "id": "020-20261106-a002",
+      "feature": "020",
+      "phase": "waiting-owner",
+      "line": "020 \u00b7 waiting-owner",
+      "owner": ["Q-1 open: Which index?"],
+      "board": ["020 \u00b7 waiting-owner"]
+    }
+  ]
+}

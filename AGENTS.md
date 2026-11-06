@@ -7,3 +7,7 @@
 - **Slice, don't fatten** one doc past an agent's context budget. Loose ideas go one file each in `docs/ideas/` (`factory docs idea add`).
 - **The gate is `gate` under `[docs]` in `docs/project.toml`** and `factory docs gate` prints it. It is the one command that proves a change is done. Every slice's Verify task runs it.
 - **The skills** `/prd`, `/slice`, `/deliver`, `/polish`, `/gate`, `/harness`, `/harvest`, `/prune` and `/ux` live in `.claude/skills/`, written by `factory init`. `factory docs doctor` says whether they are current.
+
+# Verification
+
+`make inner` while iterating, `make gate` to finish: the gate is the only proof a change is done. Run `make setup` once after cloning. Tiers, floors and the ratchet rule: `docs/reference/verification.md`.
