@@ -15,7 +15,7 @@ bad() {
 for tool in herdr-app hc factory node sqlite3; do
   if command -v "$tool" >/dev/null; then ok "$tool: $("$tool" --version 2>&1 | head -1)"; else bad "$tool is not installed"; fi
 done
-fv="$(factory --version 2>/dev/null | awk '{print $2}')"
+fv="$(factory --version 2>/dev/null | awk '{print $2}')" || true
 if [ -n "$fv" ] && [ "$(printf '%s\n0.13.0\n' "$fv" | sort -V | head -1)" = 0.13.0 ]; then
   ok "factory $fv is 0.13.0 or newer"
 else
@@ -49,7 +49,7 @@ else
   bad "status: $status"
 fi
 
-core="$(in_scratch hc server status --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).pid)}catch{}})')"
+core="$(in_scratch hc server status --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).pid)}catch{}})')" || true
 if [ -n "$core" ] && grep -qzx "HC_SESSION=$SESSION" "/proc/$core/environ" 2>/dev/null; then
   ok "core pid $core is session $SESSION, not the owner's"
 else

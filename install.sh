@@ -66,7 +66,7 @@ for name, hashes in recorded["installed"].items():
     if installed.get(name) != hashes:
         print(name)
 ' "$recorded" "$installed" 2>/dev/null)"; then
-    echo "install: could not read $installed, so the check against Herdr's spaces mod and main layout was skipped."
+    echo "install: could not compare $recorded with $installed, so the check against Herdr's spaces mod and main layout was skipped."
     return
   fi
   local version changed
@@ -79,7 +79,12 @@ for name, hashes in recorded["installed"].items():
 
 drift_check
 
+# Owned before it is written, so an interrupted install is still ours to redo.
+previous=()
+[ -f "$manifest" ] && mapfile -t previous <"$manifest"
 mkdir -p "$home/mods" "$home/layouts"
+printf '%s\n' "${previous[@]}" "${items[@]}" | grep -v '^$' | sort -u >"$manifest.tmp"
+mv "$manifest.tmp" "$manifest"
 for item in "${items[@]}"; do
   target="$home/$item"
   rm -rf "$target"
@@ -89,6 +94,12 @@ for item in "${items[@]}"; do
     cp -R "$repo/$item" "$target"
   fi
   echo "install: $item ($mode)"
+done
+for item in "${previous[@]}"; do
+  case " ${items[*]} " in *" $item "*) continue ;; esac
+  [[ "$item" =~ ^(mods/factory-[A-Za-z0-9._-]+|layouts/factory\.json)$ ]] && [[ "$item" != *..* ]] || continue
+  rm -rf "${home:?}/$item"
+  echo "install: removed $item, no longer in this checkout"
 done
 printf '%s\n' "${items[@]}" >"$manifest.tmp"
 mv "$manifest.tmp" "$manifest"

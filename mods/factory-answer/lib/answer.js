@@ -9,18 +9,18 @@
 /**
  * factory's own `answer` argv with the text as its last argument. factory puts
  * every flag before the id because the text is a trailing argument: a flag after
- * it would become answer words, so the argv is never rebuilt. A configured
- * factory command replaces only the first word.
+ * it would become answer words, so the argv is never rebuilt. Its first word is
+ * always the factory command the sidebar asked for its runs, never one read from
+ * the status.
  * @param {Question} question
  * @param {string | null | undefined} factory
  * @param {string} text
- * @returns {Call | null} null when the question carries no argv
+ * @returns {Call | null} null when the question carries no `answer` argv
  */
 export function answerCall(question, factory, text) {
   const argv = question?.answer;
-  if (!Array.isArray(argv) || !argv.length || typeof argv[0] !== "string")
-    return null;
-  return { command: factory || argv[0], args: [...argv.slice(1), text] };
+  if (!Array.isArray(argv) || argv[1] !== "answer") return null;
+  return { command: factory || "factory", args: [...argv.slice(1), text] };
 }
 
 /** @param {string} text */

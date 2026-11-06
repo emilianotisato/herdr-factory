@@ -48,3 +48,10 @@ Run `/harness`. It writes `.claude/skills/verify-herdr-factory/` with Launch, Do
 **Acceptance:** inner loop green, one commit.
 
 No Prove task: this slice has no FR. Its proof is task 1's proof run, kept in Progress.
+
+**Code-review fixes (2026-11-06).**
+
+- `bin/doctor.sh` died under `set -e` before its checklist ended when `factory` was missing or the scratch core was down, the two cases it exists to report. Both lookups now fall through to their FAIL line.
+- `bin/cleanup.sh` guarded its `rm -rf` with a test that could never fail. `launch.sh` now leaves a marker file in every scratch it makes, and cleanup deletes only a folder that has it. `launch.sh` also makes the scratch root `0700` and refuses one owned by another user, because the window runs that root's fixture `factory` and `xdrive`.
+- `bin/lib.sh` exited every helper silently when `$XDG_CONFIG_HOME` did not exist. It now falls back to `~/.config/herdr-app` as the owner's home.
+- `features/README.md` said no interactive driver exists and that targets are never named by screen position, which contradicted `bin/input.sh` and the run-actions recipe. It now says when pointer and keys are allowed, and that `<scratch>` defaults to `/tmp` and fixture ids carry the UTC date.

@@ -25,9 +25,9 @@ test("factory reads one fixture run per strip state, the live ones with a live d
 
   execFileSync(builder, ["stop", dir]);
   const stopped = checkRuns(statusOf(wrapper));
-  assert.deepEqual(
-    stopped.filter((p) => p.endsWith("driverDead true, want false")).length,
-    4,
+  assert.equal(stopped.length, 4, stopped.join("\n"));
+  assert.ok(
+    stopped.every((p) => p.endsWith("driverDead true, want false")),
     stopped.join("\n"),
   );
 });

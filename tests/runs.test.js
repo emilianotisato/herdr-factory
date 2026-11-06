@@ -97,14 +97,23 @@ test("readStatus reads the version of a factory that refuses --recent", async ()
   assert.equal(s.kind, "old");
 });
 
-test("readStatus is no factory when it is missing or keeps failing", async () => {
+test("readStatus is no factory when it is missing, and no answer when it fails", async () => {
   assert.equal(
     await readStatus(async () => {
       throw new Error("not found");
     }),
     NONE,
   );
-  assert.equal(await readStatus(async () => ({ code: 1, stdout: "" })), NONE);
+  assert.equal(await readStatus(async () => ({ code: 1, stdout: "" })), null);
+});
+
+test("readStatus never takes a new factory's live-only listing as the run list", async () => {
+  const s = await readStatus(async (args) =>
+    args.includes("--recent")
+      ? { code: 1, stdout: "" }
+      : { code: 0, stdout: fixture("0.13.0") },
+  );
+  assert.equal(s, null);
 });
 
 test("each run classifies into its strip's state", () => {
@@ -143,7 +152,7 @@ test("an open question outranks a park, a pause and a dead driver", () => {
 
 test("building: name and n/m, then the slice bar, phase and elapsed", () => {
   const s = strip(run("019"));
-  assert.equal(words(s.first), "019 platform-runtime · 3/5");
+  assert.equal(words(s.first), "019 platform-runtime 3/5");
   assert.equal(words(s.second), "[5] · building · 1h 02m");
   assert.deepEqual(s.second[0], {
     kind: "bar",
@@ -200,7 +209,26 @@ test("parked: the reason, the slice bar dimmed, a full gauge", () => {
   assert.equal(words(s.first), "022 · parked: budget");
   assert.equal(s.second[0].dim, true);
   assert.equal(s.gauge, 1);
-  assert.equal(s.gaugeColor, "blocked");
+  assert.equal(s.tone, "muted");
+  assert.equal(strip(run("021")).tone, "muted");
+});
+
+test("the gauge turns blocked only once the budget is over, not at it", () => {
+  const at = { used: 30000000, limit: 30000000 };
+  assert.equal(strip({ ...run("019"), budget: at }).gaugeColor, "working");
+  const over = { ...at, used: 30000001 };
+  assert.equal(strip({ ...run("019"), budget: over }).gaugeColor, "blocked");
+});
+
+test("a blocked slice is a blocked segment", () => {
+  const slices = [
+    { n: 1, status: "done" },
+    { n: 2, status: "blocked" },
+  ];
+  assert.deepEqual(strip({ ...run("019"), slices }).second[0].colors, [
+    "done",
+    "blocked",
+  ]);
 });
 
 test("driver dead: in blocked, then the command that restarts it", () => {
@@ -221,6 +249,9 @@ test("shipped: the PR number, CI and ×, with no gauge or gate", () => {
   assert.equal(s.gate, null);
   const pending = strip({ ...run("024"), ci: "pending" });
   assert.equal(pending.second[2].color, "working");
+  const red = strip({ ...run("024"), ci: "red" });
+  assert.equal(words(red.second), "PR #100 · CI red ×");
+  assert.equal(red.second[2].color, "blocked");
   assert.equal(
     words(strip({ ...run("024"), ci: "none" }).second),
     "PR #100 · no CI ×",
@@ -234,6 +265,34 @@ test("failed: in blocked, then elapsed and ×", () => {
   assert.equal(s.first[2].color, "blocked");
   assert.equal(words(s.second), "12m ×");
   assert.equal(words(strip(run("027")).first), "027 · failed");
+  assert.equal(s.gauge, null);
+  assert.equal(s.gate, null);
+});
+
+test("a run stopped after it opened a PR shows that PR as shipped", () => {
+  const s = strip({
+    ...run("027"),
+    pr: "https://github.com/o/r/pull/7",
+    ci: "red",
+  });
+  assert.equal(words(s.first), "027 · shipped");
+  assert.equal(words(s.second), "PR #7 · CI red ×");
+});
+
+test("questions are read as text, whatever factory sends", () => {
+  const env = JSON.parse(fixture("0.13.0"));
+  const r = env.runs.find((x) => x.feature === "020");
+  r.questions = [{ id: 7, text: { a: 1 }, answer: ["factory", 3, "answer"] }];
+  const q = parseStatus(JSON.stringify(env)).runs.find(
+    (x) => x.feature === "020",
+  ).questions[0];
+  assert.deepEqual(q, {
+    id: "7",
+    at: "",
+    n: null,
+    text: "",
+    answer: ["factory", "answer"],
+  });
 });
 
 test("elapsed prints minutes, then hours and padded minutes", () => {

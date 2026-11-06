@@ -4,7 +4,7 @@ Read this index before driving the window, then use the matching feature file as
 
 ## Baseline preconditions
 
-- `run="$(bin/launch.sh)"` has printed a run id. `<scratch>` below is `$TMPDIR/verify-herdr-factory/<run>`.
+- `run="$(bin/launch.sh)"` has printed a run id. `<scratch>` below is `${TMPDIR:-/tmp}/verify-herdr-factory/<run>`. Fixture run ids carry the UTC date (`date -u +%Y%m%d`).
 - `bin/doctor.sh <run>` prints only `ok` lines: 8 fixture runs in their states, the window on the scratch home, the core on `vhf-<run>`.
 - The window shows the shipped `main` layout and no space. Launch opens none.
 - Fixture repos: `<scratch>/fixtures/repos/shop`, `api` and `loner`. `loner` is never opened as a space.
@@ -13,8 +13,8 @@ Read this index before driving the window, then use the matching feature file as
 ## Driving conventions
 
 - Start every recipe from the baseline unless its preconditions say otherwise.
-- Scripted only: `bin/herdr.sh <run> do <command> …`, `bin/appearance.sh`, files under `<scratch>/home/`. No interactive driver exists for a native window.
-- Name targets by the ids `bin/herdr.sh <run> ls` prints, never by the focused default or by screen position.
+- Scripted first: `bin/herdr.sh <run> do <command> …`, `bin/appearance.sh`, files under `<scratch>/home/`. Pointer and keys only for what no command reaches (a toast, ×, Answer, the dialog), with `bin/input.sh` on a `VERIFY_HERDR_INPUT=x11` launch.
+- Name targets by the ids `bin/herdr.sh <run> ls` prints, never by the focused default. Screen positions only for `bin/input.sh`, read off a fresh shot.
 - Treat every command as literal. Keep quoted names and flags unchanged.
 - Wait about a second after a change before `bin/shot.sh`: it saves the last frame drawn.
 - Never remove proof artifacts during cleanup; `bin/cleanup.sh` leaves `artifacts/` alone.

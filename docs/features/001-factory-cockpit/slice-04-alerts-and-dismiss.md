@@ -47,3 +47,9 @@ In `main.js`: after each poll, post the toasts and play `blocked` per new id; pe
 §12 QA plan rows **FR-5** (open a BLOCK in a fixture; restart; click the toast; run the alert unit test: PNGs of the toast and the selected space, the test transcript) and **FR-7** (dismiss a shipped run, restart: PNGs).
 
 **Acceptance:** after the checkpoint, both rows have their evidence in Progress.
+
+**Code-review fixes (2026-11-06).**
+
+- × dismissed on mouse-up and stopped the event there. A drag that started on a row and ended over × dismissed the run and left the row half-transparent, with its drop line following the pointer. × now uses `on_click`, the same as Answer, re-driven in the window on a private X display.
+- A dismissed id outlived its run going live again, so a resumed run that shipped or failed again was hidden the moment it finished. The id is now dropped once the run is live (AD-15).
+- `features/run-actions.md` gave a store glob Herdr does not write and placed the fixture props ambiguously. It also did not say that seeding a second shipped run means rewriting `id` in its `state.json`, because factory opens a run by that id, not by its folder name. All three are now spelled out. The "alerts once" unit test now checks the stored keys, not only how many there are.

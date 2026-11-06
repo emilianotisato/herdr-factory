@@ -40,18 +40,14 @@ test("a new question asks for one toast and one sound", () => {
   assert.deepEqual(r.seen, [questionKey("r1", "Q-1")]);
 });
 
-test("a question already alerted on asks for nothing", () => {
+test("a question already alerted on asks for nothing, after a restart too", () => {
   const now = status([asking("r1", "019", ["Q-1", "Which table?"])]);
   const first = alerts([], now, { r1: "space-a" });
   const again = alerts(first.seen, now, { r1: "space-a" });
   assert.deepEqual(again.alerts, []);
   assert.deepEqual(again.seen, first.seen);
-});
-
-test("a remembered list survives a restart and still alerts nothing", () => {
-  const now = status([asking("r1", "019", ["Q-1", "Which table?"])]);
-  const stored = JSON.stringify(alerts([], now, {}).seen);
-  assert.deepEqual(alerts(storedList(stored), now, {}).alerts, []);
+  const stored = storedList(JSON.stringify(first.seen));
+  assert.deepEqual(alerts(stored, now, {}).alerts, []);
 });
 
 test("the same question id in two runs alerts twice", () => {
@@ -76,7 +72,10 @@ test("each new question of a run alerts once, beside ones already seen", () => {
     r.alerts.map((a) => a.toast.body),
     ["Two?"],
   );
-  assert.equal(r.seen.length, 2);
+  assert.deepEqual(r.seen, [
+    questionKey("r1", "Q-1"),
+    questionKey("r1", "Q-2"),
+  ]);
 });
 
 test("a run with no space alerts with nothing to click through to", () => {
@@ -125,10 +124,16 @@ test("a dismissed failed run is hidden, and every strip gone leaves no lane", ()
   );
 });
 
-test("a dismissed run that is live again shows", () => {
+test("a dismissed run that is live again shows, and its next result shows too", () => {
   const r = undismissed(["r1"], status([asking("r1", "019")]));
   assert.deepEqual(
     r.status.runs.map((x) => x.id),
+    ["r1"],
+  );
+  assert.deepEqual(r.dismissed, []);
+  const again = undismissed(r.dismissed, status([failed("r1", "019")]));
+  assert.deepEqual(
+    again.status.runs.map((x) => x.id),
     ["r1"],
   );
 });

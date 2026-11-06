@@ -107,15 +107,17 @@ export function parseStatus(stdout) {
 /**
  * Asks factory for its runs. A factory too old for `--recent` refuses the flag,
  * so a refusal is asked again without it, to read the version from the envelope.
+ * The plain listing has no finished runs, so it is never taken as the run list.
  * @param {(args: string[]) => Promise<{ code: number, stdout: string }>} ask rejects when factory is missing
- * @returns {Promise<Status>}
+ * @returns {Promise<Status | null>} null when factory gave no answer this time
  */
 export async function readStatus(ask) {
   try {
     const r = await ask(["status", "--json", "--recent"]);
     if (r.code === 0) return parseStatus(r.stdout);
     const plain = await ask(["status", "--json"]);
-    return plain.code === 0 ? parseStatus(plain.stdout) : NONE;
+    const s = plain.code === 0 ? parseStatus(plain.stdout) : null;
+    return s?.kind === "old" ? s : null;
   } catch {
     return NONE;
   }
@@ -161,20 +163,35 @@ function normalize(r) {
     driverDead: r.driverDead === true,
     stopped: r.stopped === true,
     questions: Array.isArray(r.questions)
-      ? r.questions.filter((/** @type {any} */ q) => q && q.id)
+      ? r.questions
+          .filter((/** @type {any} */ q) => q && q.id)
+          .map((/** @type {any} */ q) => ({
+            id: String(q.id),
+            at: String(q.at ?? ""),
+            n: typeof q.n === "number" ? q.n : null,
+            text: typeof q.text === "string" ? q.text : "",
+            answer: Array.isArray(q.answer)
+              ? q.answer.filter(
+                  (/** @type {unknown} */ a) => typeof a === "string",
+                )
+              : [],
+          }))
       : [],
   };
 }
 
 /**
  * The strip a run shows. A live run follows factory's own status line: a question,
- * then a park, then a pause, then a dead driver. A stopped run counts as failed.
+ * then a park, then a pause, then a dead driver. A run stopped before it opened a
+ * PR counts as failed.
  * @param {Run} run
  * @returns {State}
  */
 export function classify(run) {
   if (run.phase === "finished" || run.phase === "failed") {
-    return run.phase === "failed" || run.stopped ? "failed" : "shipped";
+    return run.phase === "failed" || (run.stopped && !run.pr)
+      ? "failed"
+      : "shipped";
   }
   if (run.questions.length) return "owner";
   if (run.parked) return "parked";
@@ -246,10 +263,10 @@ export function strip(run) {
         ? run.slices.filter((s) => s.status === "done").length
         : 0;
       const name = [f, run.slug ?? run.title].filter(Boolean).join(" ");
-      first = joined(
-        [{ ...text(name, "foreground"), fill: true }],
-        run.slices ? [text(`${done}/${run.slices.length}`)] : [],
-      );
+      first = [
+        { ...text(name, "foreground"), fill: true },
+        ...(run.slices ? [text(`${done}/${run.slices.length}`)] : []),
+      ];
       second = joined(
         bar(run, false),
         [text(run.phase)],
@@ -317,7 +334,8 @@ export function strip(run) {
     first,
     second,
     gauge,
-    gaugeColor: gauge !== null && gauge >= 1 ? "blocked" : "working",
+    gaugeColor:
+      gauge !== null && run.budget.used > limit ? "blocked" : "working",
     gate: live ? (GATE[run.checkpoints?.lastGate ?? ""] ?? null) : null,
   };
 }

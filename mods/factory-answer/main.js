@@ -1,5 +1,5 @@
 // Answers one of factory's questions. Enter or Send runs factory's own answer
-// command; Esc or Cancel closes without sending.
+// command; Esc or Cancel closes without sending, and neither closes it while it sends.
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { props, closeOverlay, exec, notify, theme } from "herdr";
@@ -101,7 +101,7 @@ export default class Answer extends View {
 
   /** @param {any} e @param {any} cx */
   key(e, cx) {
-    if (e.key === "escape") {
+    if (e.key === "escape" && !this.sending) {
       closeOverlay(this.props().overlay);
       cx.stop_propagation();
     }
@@ -198,7 +198,12 @@ export default class Answer extends View {
       )
       .when(Boolean(this.error), (el) =>
         el.child(
-          div().pt(6).text_size(11.5).text_color(t.blocked).child(this.error),
+          div()
+            .pt(6)
+            .truncate()
+            .text_size(11.5)
+            .text_color(t.blocked)
+            .child(this.error),
         ),
       )
       .child(
@@ -207,7 +212,7 @@ export default class Answer extends View {
           .gap(8)
           .justify_end()
           .child(
-            button("fa-cancel", "Cancel", false, true, () =>
+            button("fa-cancel", "Cancel", false, !this.sending, () =>
               closeOverlay(p.overlay),
             ),
           )

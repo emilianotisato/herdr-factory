@@ -21,7 +21,7 @@ export default [
     },
   },
   {
-    // Herdr's own code, kept byte-identical so a re-clone diffs cleanly.
+    // Herdr's spaces mod with the run strip added; its empty catches stay as Herdr wrote them.
     files: ["mods/factory-spaces/main.js"],
     rules: { "no-empty": ["error", { allowEmptyCatch: true }] },
   },

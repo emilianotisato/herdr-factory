@@ -47,3 +47,9 @@
 §12 QA plan row **FR-6** (answer a fixture BLOCK, then a resolved one: PNGs and `answers/BLOCK-n.json`).
 
 **Acceptance:** after the checkpoint, the row has its evidence in Progress.
+
+**Code-review fixes (2026-11-06).**
+
+- The dialog closed on a click beside it, on Esc and on Cancel while `factory answer` was still running. The answer was still sent, and a refusal was then reported nowhere. The dialog is now modal, and Esc and Cancel do nothing while it sends.
+- A two-line error pushed Cancel and Send out of the 330 px dialog (UX pass). factory's line is now kept to one line.
+- `answerCall()` ran whatever program the status named first. It now always runs the factory command the sidebar uses, and gives no call unless the argv is an `answer` one.

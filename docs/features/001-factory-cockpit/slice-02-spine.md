@@ -57,3 +57,9 @@ Read `upstream.json` and the person's `installed.json` with `python3 -I`. When p
 §12 QA plan rows **FR-1** (install twice, `--dev`, over a foreign mod, on a scratch home: transcript, `ls -la`, `cmp`) and **FR-2** (screenshot of the factory layout and of `main` with no runs; install with a stale recorded hash: two PNGs and the warning transcript).
 
 **Acceptance:** after the checkpoint, both rows have their evidence in Progress.
+
+**Code-review fixes (2026-11-06).**
+
+- `install.sh` wrote `factory-install.txt` only after every copy. An install interrupted after a new mod landed refused to run again with "not ours", and a mod renamed or removed in the checkout stayed installed and unowned. Every item is now recorded before it is written, and items the old manifest owned that the checkout no longer ships are removed (AD-16). Tests cover the removal and that a copy carries each mod's `lib/`.
+- The drift check blamed `installed.json` when it could not read `upstream.json`. It now says it could not compare the two.
+- The `eslint.config.js` comment called `factory-spaces/main.js` byte-identical to Herdr's, which stopped being true when the run strip was added.

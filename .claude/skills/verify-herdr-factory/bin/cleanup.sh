@@ -26,10 +26,10 @@ if [ -d "$FIXTURES" ]; then
   "$REPO_DIR/tests/fixtures/factory-fixtures.sh" stop "$FIXTURES"
 fi
 
-case "$SCRATCH" in
-  "$SCRATCH_ROOT"/"$RUN") rm -rf -- "$SCRATCH" ;;
-  *) die "refusing to delete $SCRATCH" ;;
-esac
+if [ -e "$SCRATCH" ]; then
+  [ -f "$SCRATCH/$MARKER" ] || die "refusing to delete $SCRATCH: launch.sh did not make it"
+  rm -rf -- "$SCRATCH"
+fi
 rmdir "$SCRATCH_ROOT" 2>/dev/null || true
 
 left=0

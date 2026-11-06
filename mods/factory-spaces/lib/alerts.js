@@ -75,25 +75,26 @@ export function alerts(seen, status, spaceOf) {
 
 /**
  * The runs whose strips still show: a shipped or failed run that was dismissed
- * goes; a dismissed run that is live again comes back. Dismissed ids of runs no
- * longer listed are dropped.
+ * goes. A dismissed run that is live again comes back and is no longer
+ * dismissed, so its next result shows. Dismissed ids of runs no longer listed
+ * are dropped.
  * @param {string[]} dismissed
  * @param {Status} status
  * @returns {{ status: Status, dismissed: string[] }}
  */
 export function undismissed(dismissed, status) {
   if (status.kind !== "ok") return { status, dismissed };
-  const listed = new Set(status.runs.map((r) => r.id));
-  const kept = dismissed.filter((id) => listed.has(id));
-  const gone = new Set(kept);
   const finished = (/** @type {Run} */ r) => {
     const state = classify(r);
     return state === "shipped" || state === "failed";
   };
+  const over = new Set(status.runs.filter(finished).map((r) => r.id));
+  const kept = dismissed.filter((id) => over.has(id));
+  const gone = new Set(kept);
   return {
     status: {
       kind: "ok",
-      runs: status.runs.filter((r) => !(gone.has(r.id) && finished(r))),
+      runs: status.runs.filter((r) => !gone.has(r.id)),
     },
     dismissed: kept,
   };

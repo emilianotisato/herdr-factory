@@ -175,3 +175,36 @@ test("tells how to pick the layout when Herdr is not running", (t) => {
   assert.match(result.stdout, /not running.*layout\.switch --name factory/);
   assert.doesNotMatch(calls(), /layout\.switch/);
 });
+
+test("a copy carries each mod whole, its lib folder too", (t) => {
+  const { home, run } = scratch(t);
+  assertOk(run());
+  for (const f of ["lib/runs.js", "lib/alerts.js"]) {
+    assert.deepEqual(
+      fs.readFileSync(path.join(home, "mods/factory-spaces", f)),
+      fs.readFileSync(path.join(repo, "mods/factory-spaces", f)),
+    );
+  }
+});
+
+test("a mod it installed that the checkout no longer has is removed", (t) => {
+  const { home, run } = scratch(t);
+  assertOk(run());
+  const old = path.join(home, "mods/factory-retired");
+  fs.mkdirSync(old);
+  fs.appendFileSync(
+    path.join(home, "factory-install.txt"),
+    "mods/factory-retired\nmods/spaces\n",
+  );
+  fs.mkdirSync(path.join(home, "mods/spaces"));
+  const r = run();
+  assertOk(r);
+  assert.equal(fs.existsSync(old), false);
+  assert.equal(fs.existsSync(path.join(home, "mods/spaces")), true);
+  assert.equal(
+    fs
+      .readFileSync(path.join(home, "factory-install.txt"), "utf8")
+      .includes("retired"),
+    false,
+  );
+});

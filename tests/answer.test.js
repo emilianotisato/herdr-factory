@@ -48,8 +48,21 @@ test("the question's argv is not changed", () => {
   assert.deepEqual(block.answer, argv);
 });
 
+test("the program is the factory command, never the status's first word", () => {
+  const odd = { ...block, answer: ["/tmp/other", ...block.answer.slice(1)] };
+  assert.equal(answerCall(odd, null, "x").command, "factory");
+  assert.equal(
+    answerCall(odd, "/tmp/fixture-factory", "x").command,
+    "/tmp/fixture-factory",
+  );
+});
+
 test("a question without an argv gives no call", () => {
   assert.equal(answerCall({ id: "Q-1", answer: [] }, null, "x"), null);
+  assert.equal(
+    answerCall({ id: "Q-1", answer: ["factory", "status"] }, null, "x"),
+    null,
+  );
   assert.equal(answerCall({ id: "Q-1" }, null, "x"), null);
   assert.equal(answerCall(null, null, "x"), null);
 });

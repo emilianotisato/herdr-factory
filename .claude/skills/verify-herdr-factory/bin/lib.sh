@@ -15,7 +15,9 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 REPO_DIR="$(cd "$SKILL_DIR/../../.." && pwd -P)"
 export REPO_DIR
 SCRATCH_ROOT="${VERIFY_HERDR_SCRATCH:-${TMPDIR:-/tmp}/verify-herdr-factory}"
-OWNER_HOME="$(cd "${XDG_CONFIG_HOME:-$HOME/.config}" 2>/dev/null && pwd -P)/herdr-app"
+OWNER_HOME="$(cd "${XDG_CONFIG_HOME:-$HOME/.config}" 2>/dev/null && pwd -P)/herdr-app" || OWNER_HOME="$HOME/.config/herdr-app"
+# launch.sh leaves it in every scratch it makes; cleanup deletes only a folder that has it.
+export MARKER=.verify-herdr-factory-scratch
 
 die() {
   echo "verify-herdr-factory: $*" >&2

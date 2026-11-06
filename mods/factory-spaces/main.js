@@ -1,7 +1,8 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
 // grouped by machine when more than one is known. After a space's name, the repo
 // its first terminal is in now, only where unusual: branch, ahead/behind. Agent state lives in the agents list, not here. Click to
-// switch, right-click for its menu, drag to reorder.
+// switch, right-click for its menu, drag to reorder. Under a space's name, its repo's
+// factory runs (lib/runs.js), with a toast for each new question (lib/alerts.js).
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
@@ -93,20 +94,26 @@ export default class Spaces extends View {
     cx.spawn(async (cx) => {
       do {
         this.askAgain = false;
-        this.factory = await readStatus((args) => exec(command, args));
+        // No answer this time (a busy or broken run folder): keep what it showed.
+        this.factory = (await readStatus((args) => exec(command, args))) ?? this.factory;
       } while (this.askAgain);
       this.asking = false;
+      this.watchRuns(cx);
       this.forget();
       this.raise();
       cx.notify();
     });
   }
 
-  // Without the folder (factory never ran here), the timer is all there is.
+  // Only a run's state or events change what it shows; its workers write all the time.
+  // Without the folder (factory never ran here) the watch is tried again after each ask.
   watchRuns(cx) {
-    const dir = props()?.runs ?? `${home()}/.local/share/factory/runs`;
+    if (this.watchingRuns) return;
+    this.watchingRuns = true;
+    const dir = (props()?.runs ?? `${home()}/.local/share/factory/runs`).replace(/\/+$/, "");
+    const shows = (path) => path === dir || /\/(state\.json|events\.jsonl)$/.test(path);
     cx.spawn(async (cx) => {
-      try { for (;;) { await watchFolder(dir); this.askRuns(cx); } } catch {}
+      try { for (;;) { if ((await watchFolder(dir)).some(shows)) this.askRuns(cx); } } catch { this.watchingRuns = false; }
     });
   }
 
@@ -535,7 +542,7 @@ export default class Spaces extends View {
       return div().id(`dismiss-${s.id}`).flex_none().px(5).rounded(4).bg(t.hover).text_color(t.muted).cursor_pointer()
         .hover((st) => st.text_color(t.foreground)).tooltip("Hide this run on this screen")
         .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-        .on_mouse_up("left", (_e, cx) => { cx.stop_propagation(); this.dismiss(s.id, cx); })
+        .on_click((_e, cx) => { cx.stop_propagation(); this.dismiss(s.id, cx); })
         .child(p.text);
     }
     if (p.kind === "control") {
@@ -553,7 +560,7 @@ export default class Spaces extends View {
   answer(id) {
     const r = this.factory.kind === "ok" ? this.factory.runs.find((r) => r.id === id) : null;
     if (!r?.questions.length) return;
-    openOverlay({ mod: "factory-answer", kind: "dialog", width: 460, height: 330, props: {
+    openOverlay({ mod: "factory-answer", kind: "dialog", modal: true, width: 460, height: 330, props: {
       run: { id: r.id, feature: r.feature, repo: r.repo }, question: r.questions[0], factory: props()?.factory ?? null,
     } });
   }

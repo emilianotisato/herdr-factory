@@ -14,7 +14,10 @@ need setsid
 need sqlite3
 [ ! -e "$SCRATCH" ] || die "$SCRATCH exists: run cleanup.sh $RUN first, or pick another run id"
 
+[ -d "$SCRATCH_ROOT" ] || { mkdir -p "$(dirname "$SCRATCH_ROOT")" && mkdir -m 700 "$SCRATCH_ROOT"; }
+[ -O "$SCRATCH_ROOT" ] || die "$SCRATCH_ROOT belongs to another user"
 mkdir -p "$APP_HOME" "$STATE_HOME" "$SCRATCH/app"
+: >"$SCRATCH/$MARKER"
 # The first-run welcome covers the window and ignores overlay.close; a home
 # with no last_run toasts "Updated to <version>" over the bottom right.
 printf '{"frame.welcomed":"skipped"}\n' >"$APP_HOME/shared.json"

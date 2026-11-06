@@ -61,3 +61,13 @@ Under the space's name in `row()`, one strip per run, from task 1's model. Theme
 §12 QA plan rows **FR-3** (two fixture repos opened as spaces; append an event: PNGs before and after, timing) and **FR-4** (one fixture run per state, light and dark: 14 PNGs; **human**: the look, in `qa-guide.md`).
 
 **Acceptance:** after the checkpoint, both rows have their evidence in Progress.
+
+**Code-review fixes (2026-11-06).**
+
+- `readStatus()` took factory's plain `status --json` as the run list whenever `--recent` failed. On 0.13.0 that list has live runs only, so one unreadable finished run hid every shipped and failed strip and made `forget()` drop every dismissal for good. A failed poll also blanked the sidebar. The fallback now only reads the version, and a poll with no answer keeps what the sidebar last drew (AD-13). The local review and the second opinion both found this.
+- The runs-folder watch started a `factory status` for every write under the folder. Workers write there all the time, so a build kept factory running back to back, with the window in front or not. It now wakes only on a run's `state.json` or `events.jsonl`, and a watch that rejects (the folder did not exist yet) is retried after each poll (AD-12). Re-driven in the window: an appended `slice_blocked` moved the strip and raised its toast within 1.5 s.
+- A run stopped after it opened a PR was drawn as failed, which hid the PR. It is now shipped with its PR and CI (AD-14).
+- The budget gauge turned `blocked` once used equalled the limit. factory rounds `used` up and parks only when the budget is exceeded, so it now turns blocked only when used is over the limit.
+- Questions were passed on unnormalised, so a non-string `text` could throw while drawing. Each field is now read as its type.
+- The building strip put its `·` beside `n/m`, at the far end of the line, because the name fills the line. The separator is gone.
+- The header of `factory-spaces/main.js` now says the file draws runs and raises toasts. New tests cover CI red, a blocked segment, the muted tone of parked and paused runs, and no gauge or gate on a failed strip.
