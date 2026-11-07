@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §9 FR-7 (with its 2026-11-07 slice-recon correction on `evidence.root`). **Depends on**: 02 (it fills `mods/factory-run/sections/shots.js`, whose `update()` slice 02 calls once per answer, and reads the `recent` list slice 02 publishes). Independent of 03, 04 and 05.
 **Created**: 2026-11-07
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `mods/factory-run/lib/shots.js` (`plan`, `stale`, path checks `component`/`segments`/`within`, `runsDir`, `shotsDir`, `size`, `regular`) with `tests/shots.test.js` (22 tests); `sections/shots.js` `update()` runs one copy pass at a time, keeping the newest answer for after it: it lists `shots/<runId>/`, plans, then per copy checks the file's folder resolves inside the evidence folder (`realpath -e`), `rm -f` the temp name, `cp -P`, `stat -c %F:%s` (a regular file ≤ 4 MiB), `mv -f -T` onto the target, else `rm -f`; then lists `shots/` and `rm -rf`s the folders `stale` returns. `view()` draws per checkpoint a heading, each copied image at `w_full()` over its caption, then the other files' names and sizes.
+- Inner loop: 2 runs, 0 red, under 1 min (184 tests). Caught: nothing.
+- Deviations: none from the tasks. AD-10 (fyi) records the cases the PRD left open: an image never copied is listed by name and size, an unstable one waits, a hostile path is not shown, and a symlinked parent folder is refused.
+- Left for the checkpoint: task 6, QA rows FR-7 (`shots-three` screenshot; `shots-hostile` `ls -la` and two `stat -c %Y`).
 
 **Slice**: The panel's last section shows the run's checkpoint screenshots, newest checkpoint first, each a panel-wide thumbnail over its caption, and non-image evidence as names and sizes. Images are copied into the app home first, because `image()` draws nothing else: only stable images of at most 4 MiB, at most 24 per run, each copied once by etag, never through a symlink or out of the evidence folder. A run's copies go when factory drops it from its recent list.
 
