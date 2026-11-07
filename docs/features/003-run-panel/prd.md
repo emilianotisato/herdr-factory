@@ -6,7 +6,7 @@ type: feature
 created: 2026-11-07
 author: Emiliano Tisato
 summary: |
-  A Run button in the factory layout's tab bar opens a side panel for the shown space's factory run: why it waits on the owner, what it is doing now, each agent's current step, the failing reason of a gate or CI round, a timeline, and the latest checkpoint screenshots. Everything comes from one new factory verb, `factory live <id> --json`, so the panel never reads run files. Draft: waits on OPEN-1, factory shipping that verb (factory idea 2026-11-07-factory-live-…).
+  A Run button in the factory layout's tab bar opens a side panel for the shown space's factory run: why it waits on the owner, what it is doing now, each agent's current step, the failing reason of a gate or CI round, a timeline, and the latest checkpoint screenshots. Everything comes from one new factory verb, `factory live <id> --json`, so the panel never reads run files. Ready: factory 0.13.1 ships the verb (factory PRD-024), and this PRD was re-checked against its real output on 2026-11-07.
 ---
 
 # PRD-003 — Run side panel in the factory layout
@@ -94,7 +94,7 @@ Screenshots land in bursts near a checkpoint's end, and many stacks make none. T
 - **Waiting on you:** one block per `attention[]` entry, holding:
   - its kind and how long it has been open
   - its title and `body`, when present
-  - the `reason.excerpt` lines in a monospace box
+  - the `reason.excerpt` lines in a monospace box, `hit` lines in full color and context lines dimmed
   - an **Answer** button for `block` and `ask` entries
 - **The Answer button** opens PRD-001's `factory-answer` dialog with the props it already takes (`mods/factory-answer/main.js:15-23`):
   - `run: { id, feature, repo }` from the envelope
@@ -106,20 +106,22 @@ Screenshots land in bursts near a checkpoint's end, and many stacks make none. T
   - `label`
   - since when
   - `progress` when present, e.g. "review 7/12"
-  - `resumesAt` for `quota` and `budget` ("resumes 14:05")
+  - `resumesAt` when set ("resumes 14:05"). Factory sets it for `quota` only; a budget park has no reset time
   - idle time
   - `decisions.count` ("14 decisions")
   - "driver dead" when `driverAlive` is false
-  - "stopping, waiting on …" from `stopping`
+  - "stopping, waiting on …" from `stopping`, which is `{on: worker|gate, what}`
 
 **Accepted cost:** a handful of fixed words for factory's booleans and enums. Everything else is factory's text.
 
 *Corrected 2026-11-07 (adversarial pass): an earlier draft said Answer passes "that question's argv". The dialog needs the run and a question object, and refuses an argv without `answer` second. It also listed fields for the Now line that never drew `waitingOn` or `resumesAt`, and claimed the panel adds no wording of its own.*
 
+*Corrected 2026-11-07 (checked against factory 0.13.1's real `live` output): excerpts are arrays of `{text, hit}`, not strings. `resumesAt` is never set for a budget park. A park's reason is its `title`. Envelope `repo` is the path as stored, not `~`-relative, which is what the Answer dialog already takes.*
+
 **Acceptance:**
 - One screenshot per `waitingOn` fixture, each showing its word on the Now line.
 - A quota park shows its `resumesAt`.
-- A park with only a `reason` shows the excerpt.
+- A `park` entry shows its reason. Factory puts that text in the entry's `title`, and its `reason.excerpt` is null.
 - A block with an excerpt shows it with its Answer button.
 - A dead driver shows "driver dead".
 - Answer on a fixture BLOCK opens the dialog titled with that id.
@@ -144,7 +146,7 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
 **Decided 2026-11-07.**
 - **Gate:**
   - while it runs: attempt, command, elapsed and the last 8 `tail` lines
-  - when red: the `excerpt` lines, and "fix changed nothing" when `fixEmpty`
+  - when red: the `excerpt` lines (`{text, hit}`, hits in full color), and "fix changed nothing" when `fixEmpty`
 - **CI:** state, round, running checks, and the `excerpt` when red.
 - **Timeline:** newest first. Each row has its time, its `label` and a dot in its `tone` color (`owner` blocked, `red` blocked, `green` done, `info` muted). Rows of tone `noise` are hidden. The list keeps at most 200 rows.
 
@@ -180,7 +182,7 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
 
 ## 10. Decisions log
 
-- **OPEN-1, factory ships `factory live` schema 1.** It blocks slicing. The factory idea `2026-11-07-factory-live-…` holds the contract, the new events it needs and the redaction rules. Unblocked when a factory release has the verb. Then re-verify §5 to §9 against it, and set this PRD `ready`.
+- ~~OPEN-1, factory ships `factory live` schema 1~~: closed 2026-11-07. Factory PRD-024 shipped it in 0.13.1 (factory PR #16, `0c62732`). §5 to §9 were re-checked against its output on 8 real runs; the four differences are corrected in §6 and §8.
 - ~~Opening~~: decided 2026-11-07, a Run button in the tab bar (owner's pick), over a strip click or a key.
 - ~~Source~~: decided 2026-11-07, factory exposes a contract (owner's pick), over reading run files.
 - ~~Sections~~: decided 2026-11-07, Waiting on you and Now, Agents, Gate and CI with the timeline, and Screenshots (owner's pick). Decisions show as a count only, on the Now line (§6).
@@ -202,7 +204,7 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
 **Gate**: `make gate`, inner loop `make inner`.
 **Surface**: the herdr-app window, the factory layout.
 **Harness**: PRD-001's `verify-herdr-factory`. Its `VERIFY_HERDR_INPUT=x11` mode clicks and types (PRD-001 AD-11), which is enough for the Run button and Answer.
-**Seed state**: PRD-001's fixture repos and runs, plus a fake factory, `tests/fixtures/fake-factory-live.sh`. It is passed in through the layout's `factory` prop and answers `live` from canned JSON files, one per section case. It is built from the contract, not from a real run, so fixtures never depend on the machine's runs folder.
+**Seed state**: PRD-001's fixture repos and runs, plus a fake factory, `tests/fixtures/fake-factory-live.sh`. It is passed in through the layout's `factory` prop and answers `live` from canned JSON files, one per section case. It is built from the contract, not from a real run, so fixtures never depend on the machine's runs folder. Each canned file copies the field shapes of factory 0.13.1's real output: `factory live <id> --json` on any finished run shows them.
 
 | FR | Proof on the real surface | Evidence | Human? |
 |---|---|---|---|
@@ -216,7 +218,7 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
 
 ## 12. Slices
 
-_(Not sliced yet: OPEN-1 holds it.)_
+_(Not sliced yet.)_
 
 ## 13. Non-goals
 
