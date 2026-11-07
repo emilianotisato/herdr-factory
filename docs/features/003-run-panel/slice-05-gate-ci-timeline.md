@@ -9,6 +9,10 @@
 - The held timeline is `snap.timeline` (slice 02 merges and caps it there), not a `ctx` field as Current code worded it; the section reads it from the snapshot.
 - A green finished gate draws its head line only: AD-9.
 - Left for the checkpoint: Prove (FR-6 `gate-red`, `gate-running`, `timeline-noise` screenshots; FR-3 `later` with `calls.log` and the timeline screenshot).
+- Prove FR-6, `gate-red` on 003-b003: cp-2/gate-red-excerpt-no-tail.png (the excerpt, hits in full color, no tail).
+- Prove FR-6, `gate-running` on 003-b003: cp-2/gate-running-tail.png (attempt, `make gate`, running 2m, the last 8 tail lines).
+- Prove FR-6, `timeline-noise` on 003-b003: cp-2/timeline-noise-info-only.png (`collect_started` only).
+- Prove FR-3 timeline half, `later` on 003-b003: cp-2/later-calls.txt (the held `--wait` from seq 11 answers 1362 ms in, the next is held 20 s) and cp-2/later-new-row-on-top.png, 2 s after that answer, `slice_done(03)` on top.
 
 **Slice**: The panel shows the gate (attempt, command, elapsed and the last 8 tail lines while it runs; the failing excerpt and "fix changed nothing" when red), CI (state, round, running checks, the excerpt when red), and the timeline newest first, a dot per row in its tone's color, `noise` rows hidden.
 

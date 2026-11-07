@@ -8,6 +8,8 @@
 - Inner loop: 2 runs, 0 red, under 1 min (184 tests). Caught: nothing.
 - Deviations: none from the tasks. AD-10 (fyi) records the cases the PRD left open: an image never copied is listed by name and size, an unstable one waits, a hostile path is not shown, and a symlinked parent folder is refused.
 - Left for the checkpoint: task 6, QA rows FR-7 (`shots-three` screenshot; `shots-hostile` `ls -la` and two `stat -c %Y`).
+- Prove FR-7, `shots-three` on 003-b003: cp-2/shots-three-thumbnails-captions.png (three thumbnails, each over its caption) and cp-2/shots-three-checkpoint-2-top.png (the Checkpoint 2 heading over its two).
+- Prove FR-7, `shots-hostile` on 004-b004: cp-2/shots-hostile-one-thumbnail.png and cp-2/shots-hostile-ls-stat.txt (`ls -la` shows one regular file; `stat -c %Y` 1794023163 before and after a poll that answered between them).
 
 **Slice**: The panel's last section shows the run's checkpoint screenshots, newest checkpoint first, each a panel-wide thumbnail over its caption, and non-image evidence as names and sizes. Images are copied into the app home first, because `image()` draws nothing else: only stable images of at most 4 MiB, at most 24 per run, each copied once by etag, never through a symlink or out of the evidence folder. A run's copies go when factory drops it from its recent list.
 

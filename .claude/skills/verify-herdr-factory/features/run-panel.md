@@ -45,3 +45,4 @@ Preconditions:
 - A call already in flight when `use` runs answers from what it read at its start, so a held call on the wrapper ignores the new case. For `later`, `use` first, then click the run's chip within a second: its first call has no wait, and the held call after it returns at the due time.
 - To switch a case on the shown run without waiting out a held call, click another chip and then the run's own chip again: the new loop's first call has no `--wait`.
 - `workspace.panels` in `<scratch>/home/shared.json` is read when the window starts: edit it, then `bin/restart.sh`.
+- The shots section sits below the timeline, past the window's bottom edge: `bin/input.sh <run> scroll 480 500 10` over the panel brings it into view. The chips stay pinned at the top while it scrolls.

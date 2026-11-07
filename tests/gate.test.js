@@ -99,7 +99,7 @@ test("no gate draws nothing", () => {
 test("red CI gives its round and excerpt", () => {
   const excerpt = [
     { text: "error[E0308]: mismatched types", hit: true },
-    { text: "  --> src/cart.rs:12", hit: false },
+    { text: "  --> src/cart.rs", hit: false },
   ];
   const v = ciView({
     state: "red",
