@@ -126,15 +126,16 @@ export const view = (snap, t, ctx) => {
           )
           .when(p.tone === "lead", (el) => el.font_medium())
           .child(p.text);
-        return i
+        // The dot rides with the part before it, so a wrapped line never starts with one.
+        return i < parts.length - 1
           ? [
               h_flex()
                 .min_w(0)
                 .max_w_full()
                 .items_start()
                 .gap_x(6)
-                .child(div().flex_none().text_color(t.dim).child("·"))
-                .child(word.min_w(0)),
+                .child(word.min_w(0))
+                .child(div().flex_none().text_color(t.dim).child("·")),
             ]
           : [word];
       }),

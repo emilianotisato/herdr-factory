@@ -72,6 +72,23 @@ export function lead(waitingOn) {
 }
 
 /**
+ * Factory's label minus what the lead already says. "the owner: BLOCK-1"
+ * after "Waiting on owner" keeps "BLOCK-1". Waiting on nothing has nothing to
+ * add, so its label ("nothing in flight") is dropped. Any other label stays.
+ * @param {unknown} label @param {unknown} waitingOn @returns {string | null}
+ */
+export function labelAfter(label, waitingOn) {
+  const l = text(label);
+  const w = text(waitingOn);
+  if (!l || !w) return l;
+  if (w === "nothing") return null;
+  const prefix = `the ${w}:`;
+  return l.toLowerCase().startsWith(prefix)
+    ? l.slice(prefix.length).trim() || null
+    : l;
+}
+
+/**
  * The Now line, in order: what the run waits on first, then factory's label,
  * since when, progress, the quota's reset time, idle time, decisions, and the
  * driver and stopping states.
@@ -88,7 +105,7 @@ export function nowLine(now, decisions, at) {
   const add = (t, tone = "plain") => {
     if (t) parts.push({ text: t, tone });
   };
-  add(text(n.label));
+  add(labelAfter(n.label, n.waitingOn));
   const held = since(n.since, at);
   add(held === null ? null : `for ${held}`);
   const p = n.progress;

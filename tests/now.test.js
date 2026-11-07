@@ -220,3 +220,18 @@ test("a body is trimmed and keeps its markdown for the panel to draw", () => {
   );
   assert.equal(b.body, "**Happened:** `make gate` failed.\n**Options:** retry");
 });
+
+test("the Now label drops what the lead already says", () => {
+  assert.deepEqual(
+    line({ waitingOn: "owner", label: "the owner: BLOCK-1" }).slice(0, 2),
+    ["Waiting on owner", "BLOCK-1"],
+  );
+  assert.equal(
+    line({ waitingOn: "nothing", label: "nothing in flight" })[1],
+    "for 12m",
+  );
+  assert.equal(
+    line({ waitingOn: "gate", label: "gate 2, attempt 1" })[1],
+    "gate 2, attempt 1",
+  );
+});
