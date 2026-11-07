@@ -118,6 +118,8 @@ Screenshots land in bursts near a checkpoint's end, and many stacks make none. T
 
 *Corrected 2026-11-07 (checked against factory 0.13.1's real `live` output): excerpts are arrays of `{text, hit}`, not strings. `resumesAt` is never set for a budget park. A park's reason is its `title`. Envelope `repo` is the path as stored, not `~`-relative, which is what the Answer dialog already takes.*
 
+*Corrected 2026-11-07 (follow-up to PR #3): a block's `body` is markdown, not plain text: factory writes `**Happened:**`, `**Options:**` and `**Recommended:**` labels, inline `code`, a fenced transcript tail and a numbered options list. The panel renders a small subset (`mods/factory-run/lib/md.js`): `**bold**` spans bold, inline code in the terminal's font without backticks, a fenced block in the excerpt's monospace box, numbered and bulleted lines as list lines. Anything else, and any marker left open, is plain text. Titles, a park's reason among them, go through the same renderer; `reason.excerpt` lines do not.*
+
 **Acceptance:**
 - One screenshot per `waitingOn` fixture, each showing its word on the Now line.
 - A quota park shows its `resumesAt`.

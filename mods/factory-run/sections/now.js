@@ -5,6 +5,7 @@ import { v_flex, h_flex } from "gpui-base";
 import { openOverlay } from "herdr";
 import { attentionBlocks, nowLine } from "../lib/now.js";
 import { box } from "./box.js";
+import { prose } from "./md.js";
 
 /** @typedef {import("../lib/live.js").SectionCtx} SectionCtx */
 /** @typedef {import("../lib/now.js").Block} Block */
@@ -86,9 +87,19 @@ function block(b, t, ctx) {
     .border_color(urgent ? t.blocked : t.border)
     .bg(t.raised)
     .child(head)
-    .child(div().pt(4).font_medium().child(b.title))
+    .child(
+      div()
+        .pt(4)
+        .font_medium()
+        .child(prose(`run-attention-title-${b.id}`, b.title, t)),
+    )
     .when(Boolean(b.body), (el) =>
-      el.child(div().pt(2).text_color(t.muted).child(b.body)),
+      el.child(
+        div()
+          .pt(2)
+          .text_color(t.muted)
+          .child(prose(`run-attention-body-${b.id}`, b.body, t)),
+      ),
     )
     .when(Boolean(excerpt), (el) => el.child(excerpt));
 }

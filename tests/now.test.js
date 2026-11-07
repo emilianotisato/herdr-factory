@@ -208,7 +208,7 @@ test("entries without an id are dropped, a missing title falls back to it", () =
   assert.deepEqual(attentionBlocks(undefined, AT), []);
 });
 
-test("a body is trimmed and its bold and code markers dropped", () => {
+test("a body is trimmed and keeps its markdown for the panel to draw", () => {
   const [b] = attentionBlocks(
     [
       {
@@ -218,5 +218,5 @@ test("a body is trimmed and its bold and code markers dropped", () => {
     ],
     AT,
   );
-  assert.equal(b.body, "Happened: make gate failed.\nOptions: retry");
+  assert.equal(b.body, "**Happened:** `make gate` failed.\n**Options:** retry");
 });

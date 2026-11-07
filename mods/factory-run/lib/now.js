@@ -28,16 +28,6 @@ const time = (v) => {
 const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 /**
- * Factory's markdown body as plain text: bold and code markers dropped.
- * @param {unknown} v
- * @returns {string | null}
- */
-const plain = (v) => {
-  const t = text(v);
-  return t && t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/`([^`\n]+)`/g, "$1");
-};
-
-/**
  * "45s", "12m", "2h 05m", "3d 4h".
  * @param {number} seconds
  * @returns {string}
@@ -134,7 +124,8 @@ function excerpt(lines) {
 }
 
 /**
- * One block per `attention[]` entry. Only a `block` or an `ask` gets a question
+ * One block per `attention[]` entry, its body kept as factory's markdown
+ * (sections/md.js draws it). Only a `block` or an `ask` gets a question
  * for the Answer dialog, which refuses an argv that is not factory's own.
  * @param {unknown} attention
  * @param {unknown} at
@@ -155,7 +146,7 @@ export function attentionBlocks(attention, at) {
         kind,
         open: since(a.openedAt, at),
         title,
-        body: plain(a.body),
+        body: text(a.body),
         excerpt: excerpt(a.reason?.excerpt),
         question:
           kind === "block" || kind === "ask"

@@ -5,7 +5,7 @@ import { settings } from "herdr";
 
 /** @typedef {import("../lib/now.js").ExcerptLine} ExcerptLine */
 
-const mono = () => {
+export const mono = () => {
   const font = settings()?.font_family;
   return typeof font === "string" && font ? font : "JetBrains Mono";
 };
