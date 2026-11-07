@@ -66,3 +66,5 @@ Pack (build): slice 7840 · prd_sections 3449 · log 3662 · outline 1963 · loo
 
 Compared with: No earlier retro in this repo.
 <!-- /factory:numbers -->
+
+**Owner review (2026-11-07):** 0 kept, 0 changed. No decide ADs; the owner left the 12 fyi ADs as the run took them.
