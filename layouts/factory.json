@@ -94,7 +94,7 @@
           },
           "window_drag": true,
           "content": {
-            "mod": "tabs"
+            "mod": "factory-tabs"
           }
         },
         {
@@ -159,6 +159,13 @@
                       "type": "block",
                       "content": {
                         "mod": "changes"
+                      }
+                    },
+                    {
+                      "id": "run",
+                      "type": "block",
+                      "content": {
+                        "mod": "factory-run"
                       }
                     }
                   ]

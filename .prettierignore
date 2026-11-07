@@ -4,6 +4,8 @@
 # --- cloned ---
 mods/factory-spaces/main.js
 mods/factory-spaces/mod.json
+mods/factory-tabs/main.js
+mods/factory-tabs/mod.json
 layouts/factory.json
 # --- end cloned ---
 node_modules/

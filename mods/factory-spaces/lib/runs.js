@@ -382,3 +382,30 @@ export function laneHeight(lane) {
 export function urgent(lane) {
   return lane?.strips[0]?.tone ?? null;
 }
+
+/**
+ * @typedef {{ spaces: Record<string, string[]>, recent: string[] }} SpaceRuns
+ */
+
+/**
+ * What `shared("factory.spaceRuns")` should become: each space's strips in strip
+ * order, and every run factory last answered with, dismissed or not.
+ * Null when there is nothing to write: no answer yet, or the same value as `previous`.
+ * @param {Record<string, Lane>} lanes
+ * @param {Status} status
+ * @param {unknown} previous
+ * @returns {SpaceRuns | null}
+ */
+export function spaceRuns(lanes, status, previous) {
+  if (status.kind !== "ok") return null;
+  /** @type {Record<string, string[]>} */
+  const spaces = {};
+  for (const id of Object.keys(lanes).sort()) {
+    const ids = lanes[id].strips.map((s) => s.id);
+    if (ids.length) spaces[id] = ids;
+  }
+  const value = { spaces, recent: status.runs.map((r) => r.id) };
+  return JSON.stringify(value) === JSON.stringify(previous ?? null)
+    ? null
+    : value;
+}

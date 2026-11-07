@@ -9,7 +9,12 @@ const repo = path.resolve(import.meta.dirname, "..");
 const upstream = JSON.parse(
   fs.readFileSync(path.join(repo, "upstream.json"), "utf8"),
 );
-const installedPaths = ["mods/factory-spaces", "layouts/factory.json"];
+const installedPaths = [
+  "mods/factory-spaces",
+  "mods/factory-tabs",
+  "mods/factory-run",
+  "layouts/factory.json",
+];
 
 function scratch(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "factory-install-"));
@@ -145,7 +150,28 @@ test("warns when Herdr's spaces mod moved on since the clone, and installs anywa
   assert.ok(fs.existsSync(path.join(home, "layouts/factory.json")));
 });
 
-test("stays quiet when Herdr's spaces mod and main layout match the clone", (t) => {
+test("warns when Herdr's tab bar moved on since the clone, naming it", (t) => {
+  const { home, run } = scratch(t);
+  const installed = JSON.parse(JSON.stringify(upstream.installed));
+  installed.tabs["win-max.svg"] = "0000000000000000";
+  fs.writeFileSync(
+    path.join(home, "installed.json"),
+    JSON.stringify(installed),
+  );
+
+  const result = run();
+
+  assertOk(result);
+  const warnings = result.stderr
+    .split("\n")
+    .filter((l) => l.startsWith("warning:"));
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /Herdr's tabs changed.*0\.1\.13.*0\.1\.99/);
+  assert.doesNotMatch(warnings[0], /spaces/);
+});
+
+test("stays quiet when every Herdr file factory cloned matches the clone", (t) => {
+  assert.ok(upstream.installed.tabs, "upstream.json records the tab bar");
   const { home, run } = scratch(t);
   fs.writeFileSync(
     path.join(home, "installed.json"),
