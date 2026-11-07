@@ -1,6 +1,6 @@
 // The side panel's live view of the shown space's factory run. While the panel
-// shows it, it holds one `factory live` call open at a time (lib/live.js) and
-// keeps the snapshot and timeline between calls, hidden too.
+// shows it, one loop at a time calls `factory live` (lib/live.js); it keeps the
+// snapshot and timeline between calls, hidden too.
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { exec, layout, props, shared, spaces, theme } from "herdr";
@@ -13,7 +13,7 @@ import * as shots from "./sections/shots.js";
 
 const colors = /** @type {() => Record<string, `#${string}`>} */ (theme);
 const SECTIONS = [now, agents, gate, shots];
-// How often a stopped loop looks whether the panel is shown again.
+// How often the panel looks whether a loop should start.
 const WAKE_MS = 1000;
 // After a failed call, and the least time between two calls.
 const RETRY_MS = 10000;
@@ -94,13 +94,16 @@ export default class RunPanel extends View {
   async loop(me, cx) {
     const live = () =>
       this.serving === me && shown(layout()) && this.current().id === me.id;
+    // The first call of a loop returns at once, so a reopened panel does not
+    // show what it held before it was hidden for a whole wait.
+    let first = true;
     while (live()) {
       const started = Date.now();
       let result;
       try {
         result = await exec(
           this.props().factory ?? "factory",
-          liveArgs(me.id, this.held.seq),
+          liveArgs(me.id, this.held.seq, !first),
         );
       } catch (e) {
         result = {
@@ -109,6 +112,7 @@ export default class RunPanel extends View {
           stderr: String(e instanceof Error ? e.message : e),
         };
       }
+      first = false;
       if (this.serving !== me) return;
       this.held = apply(this.held, me.id, result);
       if (this.held.snap && !this.held.line) {
@@ -134,6 +138,8 @@ export default class RunPanel extends View {
   render(cx) {
     const t = colors();
     const { runs, id } = this.current();
+    const published =
+      shared("factory.spaceRuns") != null && spaces().some((s) => s.active);
     const root = v_flex()
       .id("factory-run")
       .size_full()
@@ -143,7 +149,10 @@ export default class RunPanel extends View {
       .text_color(t.foreground);
     if (!id) {
       return root.child(
-        div().p(14).text_color(t.dim).child("No factory run in this space."),
+        div()
+          .p(14)
+          .text_color(t.dim)
+          .child(published ? "No factory run in this space." : "Loading…"),
       );
     }
     const held = this.held.id === id ? this.held : fresh(id);

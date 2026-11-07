@@ -7,7 +7,7 @@ export const FIX_EMPTY = "fix changed nothing";
 
 /**
  * @typedef {import("./now.js").ExcerptLine} ExcerptLine
- * @typedef {"running" | "red" | "green"} GateState
+ * @typedef {"running" | "red" | "green" | "stopped"} GateState
  * @typedef {{
  *   state: GateState,
  *   head: string[],
@@ -42,7 +42,7 @@ const CI_WORDS = {
 };
 
 /** @param {unknown} v @returns {string | null} */
-const text = (v) => (typeof v === "string" && v.trim() ? v : null);
+const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 /** @param {unknown} v @returns {number | null} */
 const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -72,7 +72,9 @@ export const toneKey = (tone) =>
 
 /**
  * The gate as the panel draws it: while it runs its last tail lines, when red
- * its excerpt and never its tail, once green only its head line.
+ * its excerpt, once green only its head line. A red gate whose log matched no
+ * excerpt line shows its tail instead, and a gate that stopped with no result
+ * (its driver died mid-run) shows its tail too.
  * @param {Record<string, any> | null | undefined} gate
  * @param {unknown} at the snapshot's `at`
  * @returns {GateView | null}
@@ -80,7 +82,13 @@ export const toneKey = (tone) =>
 export function gateView(gate, at) {
   if (!gate || typeof gate !== "object") return null;
   /** @type {GateState} */
-  const state = gate.running ? "running" : gate.red ? "red" : "green";
+  const state = gate.running
+    ? "running"
+    : gate.red === true
+      ? "red"
+      : gate.red === false
+        ? "green"
+        : "stopped";
   const n = num(gate.n);
   const attempt = num(gate.attempt);
   const head = [n === null ? "Gate" : `Gate ${n}`];
@@ -91,6 +99,8 @@ export function gateView(gate, at) {
     const elapsed = since(gate.startedAt, at);
     if (elapsed) head.push(`running ${elapsed}`);
     else head.push("running");
+  } else if (state === "stopped") {
+    head.push("stopped with no result");
   } else {
     const minutes = num(gate.minutes);
     head.push(
@@ -98,19 +108,21 @@ export function gateView(gate, at) {
     );
     if (gate.cached) head.push("cached");
   }
+  const excerpt = state === "red" ? excerptLines(gate.excerpt) : null;
   const tail =
-    state === "running"
+    state === "running" ||
+    state === "stopped" ||
+    (state === "red" && !excerpt?.length)
       ? (Array.isArray(gate.tail) ? gate.tail : [])
           .map((l) => (typeof l === "string" ? l : ""))
           .slice(-TAIL_LINES)
       : null;
-  const excerpt = state === "red" ? excerptLines(gate.excerpt) : null;
   return {
     state,
     head,
     tail,
     excerpt,
-    note: gate.fixEmpty ? FIX_EMPTY : null,
+    note: state === "red" && gate.fixEmpty ? FIX_EMPTY : null,
   };
 }
 

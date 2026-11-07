@@ -11,6 +11,7 @@ import {
   runsDir,
   shotsDir,
   stale,
+  unused,
   within,
 } from "../lib/shots.js";
 
@@ -49,22 +50,29 @@ const names = async (dir, type) => {
   return r.code === 0 ? lines(r.stdout) : [];
 };
 
+/** @param {string} path */
+const isRegular = async (path) => {
+  const st = await run("stat", ["-c", "%f:%s", "--", path]);
+  return st.code === 0 && regular(st.stdout);
+};
+
 /**
  * Copies one file through a temporary name beside its target, and keeps it
- * only when its folder resolves inside the evidence folder and it is a
- * regular file within the size cap.
+ * only when the evidence folder resolves to its own place under the runs
+ * folder, the file's folder resolves inside it, and both the source and the
+ * copy are regular files within the size cap.
  * @param {Copy} c
  */
 async function copy(c) {
   const parent = c.src.slice(0, c.src.lastIndexOf("/"));
-  const real = await run("realpath", ["-e", "--", c.root, parent]);
-  const [root, dir] = lines(real.stdout);
-  if (real.code !== 0 || !root || !dir || !within(dir, root)) return false;
+  const real = await run("realpath", ["-e", "--", c.runs, c.root, parent]);
+  const [runs, root, dir] = lines(real.stdout);
+  if (real.code !== 0 || !runs || !root || !dir) return false;
+  if (root !== `${runs}/${c.rel}` || !within(dir, root)) return false;
+  if (!(await isRegular(c.src))) return false;
   await run("rm", ["-f", "--", c.tmp]);
   const cp = await run("cp", ["-P", "--", c.src, c.tmp]);
-  const st =
-    cp.code === 0 ? await run("stat", ["-c", "%F:%s", "--", c.tmp]) : null;
-  if (st?.code === 0 && regular(st.stdout)) {
+  if (cp.code === 0 && (await isRegular(c.tmp))) {
     const mv = await run("mv", ["-f", "-T", "--", c.tmp, c.dst]);
     if (mv.code === 0) return true;
   }
@@ -79,9 +87,20 @@ async function pass(snap, ctx, cx) {
   const dir = shotsDir(app, id);
   const have = new Set(await names(dir, "f"));
   copied.set(id, have);
-  const { copies } = plan(snap.evidence, runsDir(ctx.runs, home()), id, app, [
-    ...have,
-  ]);
+  cx.notify();
+  const { copies, groups } = plan(
+    snap.evidence,
+    runsDir(ctx.runs, home()),
+    id,
+    app,
+    [...have],
+  );
+  if (snap.evidence && typeof snap.evidence === "object") {
+    for (const file of unused([...have], groups)) {
+      have.delete(file);
+      await run("rm", ["-f", "--", `${dir}/${file}`]);
+    }
+  }
   if (copies.length) await run("mkdir", ["-p", "--", dir]);
   for (const c of copies) {
     if (await copy(c)) {
@@ -171,5 +190,6 @@ export const view = (snap, t, ctx) => {
     .px(14)
     .py(6)
     .gap(12)
+    .child(div().text_size(11.5).text_color(t.muted).child("Screenshots"))
     .children(groups.map(group));
 };

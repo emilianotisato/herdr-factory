@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   EMPTY,
   TIMELINE_CAP,
+  UNREADABLE,
   UPGRADE,
   apply,
   fresh,
@@ -36,6 +37,14 @@ const snapOf = (id, timeline, extra = {}) => ({
 
 test("the first call asks without --since, later ones from the last seq and wait", () => {
   assert.deepEqual(liveArgs("r1", null), ["live", "r1", "--json"]);
+  assert.deepEqual(liveArgs("r1", null, false), ["live", "r1", "--json"]);
+  assert.deepEqual(liveArgs("r1", 7, false), [
+    "live",
+    "r1",
+    "--json",
+    "--since",
+    "7",
+  ]);
   assert.deepEqual(liveArgs("r1", 0), [
     "live",
     "r1",
@@ -71,13 +80,24 @@ test("a factory without live, or another schema, gives the upgrade line", () => 
   assert.deepEqual(outcome(answer({ ...snapOf("r1", []), schema: 2 })), {
     kind: "upgrade",
   });
-  assert.deepEqual(outcome({ code: 0, stdout: "not json", stderr: "" }), {
-    kind: "upgrade",
-  });
-  assert.deepEqual(outcome(answer({ schema: 1 })), { kind: "upgrade" });
   const held = apply(fresh("r1"), "r1", { code: 2, stdout: "", stderr: "" });
   assert.deepEqual(held.line, { kind: "upgrade" });
-  assert.match(UPGRADE, /schema 1 · factory upgrade/);
+  assert.equal(UPGRADE, "needs factory with live schema 1 · factory upgrade");
+});
+
+test("an unreadable answer keeps the last snapshot under an error line", () => {
+  const before = apply(fresh("r1"), "r1", answer(snapOf("r1", rows(1, 3))));
+  const bad = { kind: "error", text: UNREADABLE };
+  for (const result of [
+    { code: 0, stdout: '{"schema":1,"id":"r1","timeli', stderr: "" },
+    { code: 0, stdout: "null", stderr: "" },
+    answer({ schema: 1 }),
+  ]) {
+    assert.deepEqual(outcome(result), bad);
+    const after = apply(before, "r1", result);
+    assert.equal(after.snap, before.snap);
+    assert.deepEqual(after.line, bad);
+  }
 });
 
 test("another failure keeps the last snapshot and shows its first stderr line", () => {

@@ -389,7 +389,10 @@ export default class Spaces extends View {
     const rows = items.filter(it => it.w);
     // factory's runs are on this computer: a space on another machine has none.
     this.lanes = bySpace(undismissed(this.dismissed, this.factory).status, rows.map(({ w, g }) => placeOf(w, g)));
-    const runsBySpace = spaceRuns(this.lanes, this.factory, shared("factory.spaceRuns"));
+    // Until the spaces are listed and git has answered for each local one, a space with runs would be published without them.
+    const ps = panes();
+    const placed = rows.length > 0 && rows.every(({ w }) => w.machine || where(w, ps) in this.git);
+    const runsBySpace = placed ? spaceRuns(this.lanes, this.factory, shared("factory.spaceRuns")) : null;
     if (runsBySpace) setShared("factory.spaceRuns", runsBySpace);
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
     // A folded group's spaces keep their place in the order; they are only not drawn.

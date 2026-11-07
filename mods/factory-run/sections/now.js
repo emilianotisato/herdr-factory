@@ -4,6 +4,7 @@ import { div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { openOverlay } from "herdr";
 import { attentionBlocks, nowLine } from "../lib/now.js";
+import { box } from "./box.js";
 
 /** @typedef {import("../lib/live.js").SectionCtx} SectionCtx */
 /** @typedef {import("../lib/now.js").Block} Block */
@@ -51,7 +52,6 @@ function answer(b, t, ctx) {
  */
 function block(b, t, ctx) {
   const urgent = b.kind === "block" || b.kind === "ask";
-  const mono = ctx.cx?.theme?.()?.typography?.mono;
   const head = h_flex()
     .gap(6)
     .items_center()
@@ -74,23 +74,7 @@ function block(b, t, ctx) {
     )
     .when(Boolean(b.question), (el) => el.child(answer(b, t, ctx)));
   const excerpt = b.excerpt
-    ? v_flex()
-        .mt(6)
-        .px(8)
-        .py(6)
-        .rounded(6)
-        .bg(t.chrome)
-        .text_size(11.5)
-        .when(Boolean(mono), (el) => el.font_family(mono))
-        .children(
-          b.excerpt.map((l) =>
-            div()
-              .whitespace_nowrap()
-              .truncate()
-              .text_color(l.hit ? t.foreground : t.dim)
-              .child(l.text || " "),
-          ),
-        )
+    ? box(`run-attention-excerpt-${b.id}`, b.excerpt, t)
     : null;
   return v_flex()
     .id(`run-attention-${b.id}`)
@@ -131,7 +115,17 @@ export const view = (snap, t, ctx) => {
           )
           .when(p.tone === "lead", (el) => el.font_medium())
           .child(p.text);
-        return i ? [div().text_color(t.dim).child("·"), word] : [word];
+        return i
+          ? [
+              h_flex()
+                .min_w(0)
+                .max_w_full()
+                .items_start()
+                .gap_x(6)
+                .child(div().flex_none().text_color(t.dim).child("·"))
+                .child(word.min_w(0)),
+            ]
+          : [word];
       }),
     );
   return v_flex()
@@ -143,9 +137,8 @@ export const view = (snap, t, ctx) => {
           div()
             .px(14)
             .pb(6)
-            .text_size(11)
-            .font_medium()
-            .text_color(t.dim)
+            .text_size(11.5)
+            .text_color(t.muted)
             .child("Waiting on you"),
         )
         .children(blocks.map((b) => block(b, t, ctx))),

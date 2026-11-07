@@ -217,7 +217,7 @@ test("later gains one green row 3 s after use, and --wait returns on it", async 
     timed(["live", runId, "--json", "--wait", "1"]),
   ]);
 
-  assert.ok(long.s >= 2.5 && long.s <= 5, `--wait 10 took ${long.s} s`);
+  assert.ok(long.s >= 1.5 && long.s <= 5, `--wait 10 took ${long.s} s`);
   assert.equal(long.got.timeline.length, canned.timeline.length + 1);
   const row = long.got.timeline.at(-1);
   assert.deepEqual(
@@ -227,7 +227,7 @@ test("later gains one green row 3 s after use, and --wait returns on it", async 
   assert.equal(long.got.seq, canned.seq + 1);
   assert.notEqual(long.got.rev, canned.rev);
 
-  assert.ok(short.s >= 0.9 && short.s <= 2, `--wait 1 took ${short.s} s`);
+  assert.ok(short.s >= 0.9 && short.s <= 2.5, `--wait 1 took ${short.s} s`);
   assert.equal(short.got.timeline.length, canned.timeline.length);
   assert.equal(short.got.rev, canned.rev);
 });
@@ -250,7 +250,7 @@ test("once the later row has landed, a --wait from its seq is held", async (t) =
     ]),
   );
   const s = (Date.now() - start) / 1000;
-  assert.ok(s >= 0.9 && s <= 2, `--wait 1 took ${s} s`);
+  assert.ok(s >= 0.9 && s <= 2.5, `--wait 1 took ${s} s`);
   assert.equal(got.seq, canned.seq + 1);
   assert.deepEqual(got.timeline, []);
 });

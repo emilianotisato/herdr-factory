@@ -20,7 +20,10 @@ test("a missing or junk key gives no run", () => {
     assert.deepEqual(pick(junk, "shop", null), { runs: [], id: null });
   }
   assert.deepEqual(
-    readSpaceRuns({ spaces: { shop: [1, "", "r", "r"] }, recent: "x" }),
+    readSpaceRuns({
+      spaces: { shop: [1, "", "r", "r", "--json"] },
+      recent: "x",
+    }),
     {
       spaces: { shop: ["r"] },
       recent: [],
@@ -35,9 +38,15 @@ test("a space with two runs gives the first and both as chips", () => {
 });
 
 test("a chosen chip is kept while it is in the list, then the first again", () => {
-  assert.equal(pick(key, "shop", "r-second").id, "r-second");
+  assert.deepEqual(pick(key, "shop", "r-second"), {
+    runs: ["r-urgent", "r-second", "r-third"],
+    id: "r-second",
+  });
   const later = { spaces: { shop: ["r-urgent", "r-third"] }, recent: [] };
-  assert.equal(pick(later, "shop", "r-second").id, "r-urgent");
+  assert.deepEqual(pick(later, "shop", "r-second"), {
+    runs: ["r-urgent", "r-third"],
+    id: "r-urgent",
+  });
 });
 
 test("a space absent from the key gives none", () => {

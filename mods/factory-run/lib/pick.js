@@ -5,10 +5,15 @@
  * @typedef {{ runs: string[], id: string | null }} Pick
  */
 
+// An id is passed to factory as an argument, so one that reads as a flag is dropped.
 /** @param {unknown} list @returns {string[]} */
 const ids = (list) =>
   Array.isArray(list)
-    ? [...new Set(list.filter((x) => typeof x === "string" && x))]
+    ? [
+        ...new Set(
+          list.filter((x) => typeof x === "string" && x && !x.startsWith("-")),
+        ),
+      ]
     : [];
 
 /**

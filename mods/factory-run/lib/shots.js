@@ -8,8 +8,9 @@ export const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
 export const SHOTS = "data/factory-run/shots";
 
 /**
- * @typedef {{ src: string, dst: string, tmp: string, root: string, file: string }} Copy
- *   `src` under `root`; `tmp` beside `dst`, renamed onto it once checked
+ * @typedef {{ src: string, dst: string, tmp: string, runs: string, rel: string, root: string, file: string }} Copy
+ *   `src` under `root`, which is `rel` under `runs`; `tmp` beside `dst`, renamed
+ *   onto it once checked
  * @typedef {{ file: string, path: string, caption: string }} Shot
  *   `path` is relative to the app home, the form `image()` loads
  * @typedef {{ name: string, size: string }} Other
@@ -179,6 +180,8 @@ export function plan(evidence, runs, runId, appHome, existing = []) {
       src: `${root}/${x.parts.join("/")}`,
       dst: `${dir}/${file}`,
       tmp: `${dir}/.${file}.part`,
+      runs,
+      rel: `${runId}/${ev.root}`,
       root,
       file,
     });
@@ -200,6 +203,19 @@ export function stale(folders, recent) {
 }
 
 /**
+ * The copies in a run's shots folder that no shot of `groups` draws any more:
+ * an image rewritten since, under a new etag, or one past the newest
+ * `MAX_COPIES`.
+ * @param {string[]} existing file names in the run's shots folder
+ * @param {Group[]} groups
+ * @returns {string[]}
+ */
+export function unused(existing, groups) {
+  const drawn = new Set(groups.flatMap((g) => g.shots.map((s) => s.file)));
+  return existing.filter((f) => /^\d+-\d+\.[a-z]+$/.test(f) && !drawn.has(f));
+}
+
+/**
  * Non-empty lines of a command's output.
  * @param {string} stdout
  * @returns {string[]}
@@ -210,10 +226,13 @@ export const lines = (stdout) =>
     .filter(Boolean);
 
 /**
- * Whether `stat -c '%F:%s'` describes a regular file the size of an allowed copy.
+ * Whether `stat -c '%f:%s'` (the raw mode in hex, which no locale translates)
+ * describes a regular file the size of an allowed copy.
  * @param {string} stdout
  */
 export function regular(stdout) {
-  const m = /^regular file:(\d+)$/.exec(String(stdout ?? "").trim());
-  return Boolean(m) && Number(m?.[1]) <= MAX_BYTES;
+  const m = /^([0-9a-f]+):(\d+)$/.exec(String(stdout ?? "").trim());
+  if (!m) return false;
+  const type = parseInt(m[1], 16) & 0o170000;
+  return type === 0o100000 && Number(m[2]) <= MAX_BYTES;
 }

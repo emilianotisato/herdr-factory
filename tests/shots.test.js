@@ -5,6 +5,7 @@ import {
   lines,
   plan,
   regular,
+  unused,
   runsDir,
   segments,
   shotsDir,
@@ -54,6 +55,8 @@ test("a good entry copies from the run's evidence into the app home", () => {
     src: `${RUNS}/${RUN}/evidence/checkpoint-1/cart.png`,
     dst: `${APP}/data/factory-run/shots/${RUN}/${etag}.png`,
     tmp: `${APP}/data/factory-run/shots/${RUN}/.${etag}.png.part`,
+    runs: RUNS,
+    rel: `${RUN}/evidence`,
     root: `${RUNS}/${RUN}/evidence`,
     file: `${etag}.png`,
   });
@@ -341,10 +344,31 @@ test("sizes read in bytes, kilobytes and megabytes", () => {
   assert.equal(size(3 * 1024 * 1024), "3.0 MB");
 });
 
-test("only a regular file within the size cap is kept", () => {
-  assert.ok(regular("regular file:843\n"));
-  assert.ok(!regular("symbolic link:30"));
-  assert.ok(!regular("regular empty file:0"));
-  assert.ok(!regular(`regular file:${MAX_BYTES + 1}`));
+test("only a regular file within the size cap is kept, in any locale", () => {
+  assert.ok(regular("81a4:843\n"));
+  assert.ok(regular("8180:0"));
+  assert.ok(regular(`81a4:${MAX_BYTES}`));
+  assert.ok(!regular(`81a4:${MAX_BYTES + 1}`));
+  assert.ok(!regular("a1ff:30"), "a symbolic link");
+  assert.ok(!regular("11a4:0"), "a fifo");
+  assert.ok(!regular("41ed:4096"), "a folder");
+  assert.ok(!regular("regular file:843"));
   assert.deepEqual(lines("a\n\nb\n"), ["a", "b"]);
+});
+
+test("copies no shot draws any more are the ones to remove", () => {
+  const p = plan(
+    evidence([
+      { n: 1, state: "done", files: [image("checkpoint-1/cart.png", 14)] },
+    ]),
+    RUNS,
+    RUN,
+    APP,
+  );
+  const drawn = p.groups[0].shots[0].file;
+  const old = `843-${1794039000000 + 3 * 60000}.png`;
+  assert.deepEqual(unused([drawn, old, ".x.png.part", "notes.txt"], p.groups), [
+    old,
+  ]);
+  assert.deepEqual(unused([drawn, old], []), [drawn, old]);
 });

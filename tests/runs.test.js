@@ -407,6 +407,10 @@ test("the space-runs key is written only when it changes", () => {
   assert.equal(spaceRuns(bySpace(current, places), current, stored), null);
   const fewer = { kind: "ok", runs: current.runs.slice(1) };
   assert.notEqual(spaceRuns(bySpace(fewer, places), fewer, stored), null);
+  const kept = { kind: "ok", runs: current.runs.slice(1) };
+  const dismissed = spaceRuns(bySpace(kept, places), current, stored);
+  assert.deepEqual(dismissed?.recent, stored.recent);
+  assert.notDeepEqual(dismissed?.spaces, stored.spaces);
 });
 
 test("no answer from factory writes no space-runs key", () => {

@@ -53,3 +53,8 @@
 - **FR-3**, the timeline half slice 02 left here: case `later`, `calls.log` and a screenshot 2 s after the held call returns, showing the new row on top of the timeline.
 
 **Acceptance:** after the checkpoint, each row has its PNG (and `calls.log` for FR-3) in this slice's Progress.
+
+**Code-review fixes (2026-11-07).**
+- A gate whose driver died mid-run (`running` false, `red` null in factory's `gate.rs`) was drawn green. It is now "stopped with no result", muted, with its tail (AD-11).
+- A red gate whose excerpt was empty drew a red head and no lines; it now shows the last 8 tail lines. "fix changed nothing" showed under a running gate too; FR-6 puts it under a red one only (AD-11).
+- Excerpt boxes drew in the UI sans and cut long lines, hiding the file:line or expectation that says why a gate failed. They now use the terminal font and wrap; a running gate's tail still cuts (AD-14).

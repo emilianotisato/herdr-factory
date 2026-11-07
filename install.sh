@@ -50,11 +50,11 @@ running_version() {
 drift_check() {
   local recorded="$repo/upstream.json" installed="$home/installed.json" out
   if ! command -v python3 >/dev/null; then
-    echo "install: python3 not found, so the check against the Herdr files factory cloned was skipped."
+    echo "install: python3 not found, so the check against the Herdr files this repo clones was skipped."
     return
   fi
   if [ ! -f "$installed" ]; then
-    echo "install: no $installed, so the check against the Herdr files factory cloned was skipped."
+    echo "install: no $installed, so the check against the Herdr files this repo clones was skipped."
     return
   fi
   if ! out="$(python3 -I -c '
@@ -66,14 +66,14 @@ for name, hashes in recorded["installed"].items():
     if installed.get(name) != hashes:
         print(name)
 ' "$recorded" "$installed" 2>/dev/null)"; then
-    echo "install: could not compare $recorded with $installed, so the check against the Herdr files factory cloned was skipped."
+    echo "install: could not compare $recorded with $installed, so the check against the Herdr files this repo clones was skipped."
     return
   fi
   local version changed
   version="$(head -n1 <<<"$out")"
   changed="$(tail -n +2 <<<"$out" | paste -sd, - | sed 's/,/, /g')"
   if [ -n "$changed" ]; then
-    echo "warning: Herdr's $changed changed since factory cloned it from herdr-app $version; you run herdr-app $(running_version). The factory layout may lag Herdr's own until the clone is redone." >&2
+    echo "warning: Herdr's $changed changed since this repo cloned them from herdr-app $version; you run herdr-app $(running_version). The factory layout may lag Herdr's own until the clone is redone." >&2
   fi
 }
 

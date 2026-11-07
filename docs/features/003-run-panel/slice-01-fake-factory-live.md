@@ -69,3 +69,6 @@ Same files. Case `exit-2`: prints factory's usage error on stderr, exits 2. Case
 **Acceptance:** inner loop green, one commit.
 
 No Prove task: this slice is seed state, with no QA plan row of its own. Its test runs in the gate, and every later Prove row drives it.
+
+**Code-review fixes (2026-11-07).**
+- The harness recipe's delayed-event step said to `use … later` with the panel shown, which its own gotcha contradicts: a call in flight ignores the new case. It now says to click another chip and back within a second.

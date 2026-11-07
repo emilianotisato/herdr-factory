@@ -3,7 +3,8 @@
 // line shown when factory cannot answer.
 
 export const SCHEMA = 1;
-export const UPGRADE = "needs factory with `live` schema 1 · factory upgrade";
+export const UPGRADE = "needs factory with live schema 1 · factory upgrade";
+export const UNREADABLE = "factory live printed no readable answer";
 export const WAIT_SECONDS = 20;
 export const TIMELINE_CAP = 200;
 
@@ -27,16 +28,21 @@ export const TIMELINE_CAP = 200;
  */
 
 /**
- * The arguments for the next call. A first call returns at once with the last
- * 100 events; a later one waits for anything after `since`.
+ * The arguments for the next call. With nothing held it returns the last 100
+ * events; with `since` it returns what came after. Only a `wait` call is held
+ * open until something new arrives.
  * @param {string} id
  * @param {number | null} since
+ * @param {boolean} [wait]
  * @returns {string[]}
  */
-export function liveArgs(id, since) {
+export function liveArgs(id, since, wait = true) {
   const args = ["live", id, "--json"];
   if (since === null || since === undefined) return args;
-  return [...args, "--since", String(since), "--wait", String(WAIT_SECONDS)];
+  const held = ["--since", String(since)];
+  return wait
+    ? [...args, ...held, "--wait", String(WAIT_SECONDS)]
+    : [...args, ...held];
 }
 
 /** @type {Held} */
@@ -72,12 +78,13 @@ export function outcome(result) {
   try {
     snap = JSON.parse(result.stdout);
   } catch {
-    return { kind: "upgrade" };
+    return { kind: "error", text: UNREADABLE };
   }
-  if (!snap || typeof snap !== "object" || snap.schema !== SCHEMA) {
-    return { kind: "upgrade" };
+  if (!snap || typeof snap !== "object") {
+    return { kind: "error", text: UNREADABLE };
   }
-  if (typeof snap.id !== "string") return { kind: "upgrade" };
+  if (snap.schema !== SCHEMA) return { kind: "upgrade" };
+  if (typeof snap.id !== "string") return { kind: "error", text: UNREADABLE };
   const rows = Array.isArray(snap.timeline) ? snap.timeline : [];
   return {
     kind: "snap",

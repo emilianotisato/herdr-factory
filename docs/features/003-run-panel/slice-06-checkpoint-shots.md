@@ -71,3 +71,10 @@
 The human half ("are thumbnails big enough to judge") is the owner's, in `qa-guide.md`.
 
 **Acceptance:** after the checkpoint, the PNG and the `ls -la` and `stat` transcripts in this slice's Progress.
+
+**Code-review fixes (2026-11-07).**
+- `shots/<runId>/` grew without limit: a re-taken screenshot gets a new etag, and old copies stayed until the run left `recent`. Copies no drawn shot names are now deleted after each answer (AD-15). Four reviewers found it independently.
+- `regular()` matched `stat %F`'s English "regular file", which is translated: under a non-English locale no copy was ever kept. It now reads the raw mode (`%f`).
+- The nesting check resolved the evidence folder itself, so a symlinked `evidence` or run folder passed. The resolved evidence folder must now be `<resolved runs>/<runId>/<root>` exactly.
+- The size and type were checked only after `cp`, so a FIFO stalled a pass for 30 s and a huge file was copied in full first. The source is now stat'd before the copy too.
+- The section drew nothing from disk until the first new copy finished; it now redraws once it has listed the run's folder. The section gained a "Screenshots" heading.

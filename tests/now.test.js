@@ -207,3 +207,16 @@ test("entries without an id are dropped, a missing title falls back to it", () =
   assert.equal(blocks[0].open, null);
   assert.deepEqual(attentionBlocks(undefined, AT), []);
 });
+
+test("a body is trimmed and its bold and code markers dropped", () => {
+  const [b] = attentionBlocks(
+    [
+      {
+        ...blockEntry,
+        body: "**Happened:** `make gate` failed.\n**Options:** retry\n",
+      },
+    ],
+    AT,
+  );
+  assert.equal(b.body, "Happened: make gate failed.\nOptions: retry");
+});

@@ -2,37 +2,9 @@
 import { div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { ciView, gateView, timelineRows } from "../lib/gate.js";
+import { box } from "./box.js";
 
-/** @typedef {import("../lib/now.js").ExcerptLine} ExcerptLine */
 /** @typedef {import("../lib/gate.js").TimelineRow} TimelineRow */
-
-/**
- * A monospace box of log lines: hits in full color, context dimmed.
- * @param {string} id
- * @param {ExcerptLine[]} lines
- * @param {Record<string, any>} t
- * @param {string | undefined} mono
- */
-function box(id, lines, t, mono) {
-  return v_flex()
-    .id(id)
-    .mt(4)
-    .px(8)
-    .py(6)
-    .rounded(6)
-    .bg(t.chrome)
-    .text_size(11.5)
-    .when(Boolean(mono), (el) => el.font_family(mono))
-    .children(
-      lines.map((l) =>
-        div()
-          .whitespace_nowrap()
-          .truncate()
-          .text_color(l.hit ? t.foreground : t.dim)
-          .child(l.text || " "),
-      ),
-    );
-}
 
 /**
  * @param {string[]} head
@@ -70,11 +42,11 @@ const STATE_COLOR = {
   running: "working",
   red: "blocked",
   green: "done",
+  stopped: "muted",
 };
 
 /** @type {import("../lib/live.js").SectionView} */
-export const view = (snap, t, ctx) => {
-  const mono = ctx.cx?.theme?.()?.typography?.mono;
+export const view = (snap, t) => {
   const gate = gateView(snap.gate, snap.at);
   const ci = ciView(snap.ci);
   const rows = timelineRows(snap.timeline);
@@ -93,12 +65,12 @@ export const view = (snap, t, ctx) => {
               "run-gate-tail",
               (gate.tail ?? []).map((text) => ({ text, hit: true })),
               t,
-              mono,
+              { wrap: false },
             ),
           ),
         )
         .when(Boolean(gate.excerpt?.length), (el) =>
-          el.child(box("run-gate-excerpt", gate.excerpt ?? [], t, mono)),
+          el.child(box("run-gate-excerpt", gate.excerpt ?? [], t)),
         )
         .when(Boolean(gate.note), (el) =>
           el.child(div().pt(2).text_color(t.blocked).child(gate.note)),
@@ -122,7 +94,7 @@ export const view = (snap, t, ctx) => {
           ),
         )
         .when(Boolean(ci.excerpt?.length), (el) =>
-          el.child(box("run-ci-excerpt", ci.excerpt ?? [], t, mono)),
+          el.child(box("run-ci-excerpt", ci.excerpt ?? [], t)),
         )
     : null;
 

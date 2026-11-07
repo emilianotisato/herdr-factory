@@ -83,3 +83,12 @@
 - **FR-3**: case `later` on a run: `calls.log` shows the held `--wait 20` call returning about 3 s after `use`, with the next call carrying `--since` of the new seq. The screenshot of the new row on the timeline belongs to slice 05, which draws the timeline. Hide the panel, wait 30 s: `calls.log` has no call meanwhile. Cases `exit-2` and `exit-1`: screenshots of the upgrade line, and of the kept view with `no run …` dimmed.
 
 **Acceptance:** after the checkpoint, each row has its transcript or PNG in this slice's Progress.
+
+**Code-review fixes (2026-11-07).**
+- An answer that did not parse, or had schema 1 and no string `id`, showed the upgrade line and blanked the sections. FR-3 reserves that line for exit 2 and another schema, so a cut-off answer told the owner to upgrade a current factory. It now keeps the view under a dim "factory live printed no readable answer" (AD-13).
+- A reopened panel's first call carried `--wait 20`, so it drew what it held before being hidden as current for up to 20 s. Each loop's first call now returns at once (AD-12).
+- After a restart the panel said "No factory run in this space." for a space that has one: the sidebar published `factory.spaceRuns` before git had answered for its spaces, so every space looked empty. The sidebar now publishes only once its spaces are listed and each local one is placed, and the panel says "Loading…" while the key does not exist yet.
+- A run id starting with `-` would reach factory as a flag; `readSpaceRuns` drops it.
+- The header comment claimed one `factory live` call at a time, which AD-2 contradicts; the `WAKE_MS` comment credited the loop with what `wake` does. Both now say what the code does.
+- `install.sh`'s drift messages said "factory cloned", which reads as the factory binary; they now name this repo's clones.
+- The space-runs test now pins that a dismiss, which changes `spaces` and keeps `recent`, is written; the pick tests pin the chip list, not only the chosen id.

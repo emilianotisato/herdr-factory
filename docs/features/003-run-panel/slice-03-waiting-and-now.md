@@ -55,3 +55,8 @@
 The human half of the row ("does the top read in five seconds") is the owner's, in `qa-guide.md`.
 
 **Acceptance:** after the checkpoint, each row has its PNG in this slice's Progress.
+
+**Code-review fixes (2026-11-07).**
+- Attention bodies kept factory's trailing newline, drawing a blank last line, and showed raw `**Happened:**` markers. Bodies are trimmed and drop bold and code markers (AD-14).
+- The excerpt box read its font from the theme's `typography.mono`, which is empty, so it drew in the UI sans, and it cut every line at the panel edge. It now shares `sections/box.js` with the gate, uses the terminal font and wraps.
+- A wrapped Now line could start or end on a lone "·"; each separator now travels with the word after it. "Waiting on you" takes the other section headings' style.

@@ -56,11 +56,34 @@ test("a running gate with no tail gives no lines", () => {
   assert.deepEqual(gateView({ running: true, tail: null }, null)?.tail, []);
 });
 
-test("an empty fix adds its note", () => {
+test("an empty fix adds its note to a red gate only", () => {
   const snap = fixture("gate-red");
   const v = gateView({ ...snap.gate, fixEmpty: true }, snap.at);
   assert.equal(v?.note, FIX_EMPTY);
   assert.equal(FIX_EMPTY, "fix changed nothing");
+  const running = fixture("gate-running");
+  assert.equal(
+    gateView({ ...running.gate, fixEmpty: true }, running.at)?.note,
+    null,
+  );
+});
+
+test("a red gate whose log matched no excerpt line shows its tail", () => {
+  const tail = Array.from({ length: 12 }, (_, i) => `line ${i}`);
+  const v = gateView({ red: true, excerpt: [], tail }, null);
+  assert.equal(v?.state, "red");
+  assert.deepEqual(v?.excerpt, []);
+  assert.deepEqual(v?.tail, tail.slice(-8));
+});
+
+test("a gate that stopped with no result is not called green", () => {
+  const v = gateView(
+    { n: 2, attempt: 1, running: false, red: null, tail: ["last"] },
+    null,
+  );
+  assert.equal(v?.state, "stopped");
+  assert.deepEqual(v?.head, ["Gate 2", "attempt 1", "stopped with no result"]);
+  assert.deepEqual(v?.tail, ["last"]);
 });
 
 test("a finished green gate gives its head line only", () => {

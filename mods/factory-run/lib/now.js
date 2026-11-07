@@ -25,7 +25,17 @@ const time = (v) => {
 };
 
 /** @param {unknown} v @returns {string | null} */
-const text = (v) => (typeof v === "string" && v.trim() ? v : null);
+const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
+
+/**
+ * Factory's markdown body as plain text: bold and code markers dropped.
+ * @param {unknown} v
+ * @returns {string | null}
+ */
+const plain = (v) => {
+  const t = text(v);
+  return t && t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/`([^`\n]+)`/g, "$1");
+};
 
 /**
  * "45s", "12m", "2h 05m", "3d 4h".
@@ -145,7 +155,7 @@ export function attentionBlocks(attention, at) {
         kind,
         open: since(a.openedAt, at),
         title,
-        body: text(a.body),
+        body: plain(a.body),
         excerpt: excerpt(a.reason?.excerpt),
         question:
           kind === "block" || kind === "ask"
