@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "factory": "0.13.1",
+  "id": "<run>",
+  "feature": "<feature>",
+  "phase": "finished",
+  "repo": "<repo>",
+  "branch": "feat/<run>",
+  "seq": 15,
+  "rev": "5a17c0e42e2ac0ea",
+  "at": "2026-11-07T10:00:00Z",
+  "now": {
+    "waitingOn": "done",
+    "label": "run finished",
+    "since": "2026-11-07T09:21:00Z",
+    "progress": null,
+    "resumesAt": null,
+    "idleSeconds": 2340,
+    "driverAlive": false,
+    "stopping": null
+  },
+  "attention": [],
+  "workers": [],
+  "gate": {
+    "n": 1,
+    "attempt": 1,
+    "cmd": null,
+    "running": false,
+    "startedAt": null,
+    "red": false,
+    "minutes": 2.1,
+    "cached": false,
+    "log": "gates/1-1.log",
+    "bytes": 48210,
+    "tail": [
+      "=== 7. test",
+      "ok 212 tests, 0 failed",
+      "coverage 93.4% (floor 90%)",
+      "gate: green in 2m 06s"
+    ],
+    "excerpt": null,
+    "fixEmpty": false
+  },
+  "ci": {
+    "state": "green",
+    "round": null,
+    "head": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b",
+    "checks": [],
+    "excerpt": null
+  },
+  "evidence": {
+    "root": "evidence",
+    "checkpoints": [],
+    "skipped": 0,
+    "truncated": false
+  },
+  "decisions": {
+    "count": 3
+  },
+  "truncated": [],
+  "timeline": [
+    {
+      "seq": 1,
+      "ts": "2026-11-07T07:00:00Z",
+      "kind": "run_started",
+      "tone": "info",
+      "label": "run_started",
+      "data": {}
+    },
+    {
+      "seq": 2,
+      "ts": "2026-11-07T07:02:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(01)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-01",
+        "slice": 1
+      }
+    },
+    {
+      "seq": 3,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 4,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 5,
+      "ts": "2026-11-07T07:31:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(02)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-02",
+        "slice": 2
+      }
+    },
+    {
+      "seq": 6,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 7,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 8,
+      "ts": "2026-11-07T08:01:00Z",
+      "kind": "checkpoint_started",
+      "tone": "info",
+      "label": "checkpoint_started(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 9,
+      "ts": "2026-11-07T08:08:00Z",
+      "kind": "gate_run",
+      "tone": "green",
+      "label": "gate_run(1)",
+      "data": {
+        "attempt": 1,
+        "log": "gates/1-1.log",
+        "minutes": 2.1,
+        "n": 1,
+        "red": false
+      }
+    },
+    {
+      "seq": 10,
+      "ts": "2026-11-07T08:16:00Z",
+      "kind": "checkpoint_done",
+      "tone": "green",
+      "label": "checkpoint_done(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 11,
+      "ts": "2026-11-07T09:00:00Z",
+      "kind": "polish_done",
+      "tone": "green",
+      "label": "polish_done",
+      "data": {}
+    },
+    {
+      "seq": 12,
+      "ts": "2026-11-07T09:10:00Z",
+      "kind": "pr_opened",
+      "tone": "green",
+      "label": "pr_opened",
+      "data": {
+        "url": "https://github.com/example/shop/pull/118"
+      }
+    },
+    {
+      "seq": 13,
+      "ts": "2026-11-07T09:20:00Z",
+      "kind": "ci_green",
+      "tone": "green",
+      "label": "ci_green",
+      "data": {
+        "head": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b"
+      }
+    },
+    {
+      "seq": 14,
+      "ts": "2026-11-07T09:21:00Z",
+      "kind": "shipped",
+      "tone": "green",
+      "label": "shipped",
+      "data": {
+        "sha": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b"
+      }
+    },
+    {
+      "seq": 15,
+      "ts": "2026-11-07T09:21:00Z",
+      "kind": "run_finished",
+      "tone": "green",
+      "label": "run_finished",
+      "data": {
+        "checkpoints": 1,
+        "ci_cycles": 0,
+        "duration_minutes": 141,
+        "pr_url": "https://github.com/example/shop/pull/118",
+        "slices": 2,
+        "weighted_tokens": 9800000
+      }
+    }
+  ]
+}

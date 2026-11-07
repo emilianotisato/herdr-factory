@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §11 QA plan (Seed state, Harness), and the acceptance of §5 FR-3 to §9 FR-7 that name a fixture. **Depends on**: — (independent: it touches only `tests/` and the harness's feature map, so it builds beside slice 02)
 **Created**: 2026-11-07
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `tests/fixtures/fake-factory-live.sh` (`build`, `use`, and the `serve` the generated `bin/factory` calls), 20 canned cases plus three committed 320×200 PNGs under `tests/fixtures/live/`, the built-in `exit-1` and `exit-2`, `tests/fake-factory-live.test.js` (10 tests, about 5 s), and `features/run-panel.md` with its README line.
+- Inner loop: 1 run, 0 red, under 1 min (8 s). The test file passed alone first, in 5 s.
+- Deviations: the passthrough runs the wrapper as a child, not `exec`, so the log has its exit code, and each log line carries the duration too (AD-5). `use` also moves the case's times to now and rewrites `branch` and the Answer argv's feature (AD-6). The fake needs `jq` (AD-4).
+- Left for the checkpoint: running the recipe's commands against a launched scratch (task 5's acceptance).
 
 **Slice**: The harness gains a fake `factory` that answers `factory live <id> --json` from canned JSON, one file per section case the QA plan names, and passes every other verb (and `live` for a run with no case set) to PRD-001's fixture wrapper. It logs each call with its time. The harness's feature map says how to put it in a layout's props and pick a case. Nothing in the product changes; this is the seed every panel proof leans on, so it lands first.
 
