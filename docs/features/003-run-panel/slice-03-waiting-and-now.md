@@ -3,7 +3,11 @@
 **Source**: [`prd.md`](prd.md) → §6 FR-4. **Depends on**: 02 (it fills `mods/factory-run/sections/now.js`, which slice 02 lays out and feeds the snapshot). Independent of 04, 05 and 06: each owns its own section and lib file.
 **Created**: 2026-11-07
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- **Built.** `mods/factory-run/lib/now.js` holds `nowLine(now, decisions, at)`, which returns the line's parts with a tone each (lead, plain, alert), and `attentionBlocks(attention, at)`, which returns per entry its kind, open-for, title, body, excerpt `{text, hit}` and, for `block`/`ask` only, the dialog's `question` `{id, text: title, answer}`. Durations are measured against the envelope's `at`. `tests/now.test.js` (22 tests) asserts the lead word for each `waitingOn`, quota `resumes HH:MM` and none for budget, `7/12`, `driver dead`, `stopping, waiting on gate: …`, a park with its title and no excerpt, and no Answer on a warn. `sections/now.js` draws a "Waiting on you" heading and one bordered block per entry: kind, id and open time, title, body, and the excerpt in a box set in the theme's mono face with hit lines in full color and context lines dimmed. Then it draws the Now line, parts separated by "·". Answer (`#run-answer-<id>`) opens `factory-answer` with the strip's spec and `ctx.run`, `question` and `ctx.factory` (the panel's own prop). `main.js` and `ctx` are unchanged.
+- **Inner loop:** 2 runs, 0 red, about 1 min of runs (5 s each). Nothing was caught. One trap: the mods tier wrote a `gpui-kit.d.ts` into `sections/` once the section imported `gpui-kit`. `.gitignore` now covers `mods/*/*/gpui-kit.d.ts` (AD-7).
+- **Deviations:** the Now line's own wording, AD-8 (fyi): `since` as "for 12m", `done` leads "Done", Answer kept for a block/ask without an argv.
+- **Prove (task 4):** left for the checkpoint, along with the FR-4 rows: ten `waitingOn` screenshots, `park`, `block-excerpt` with Answer, and the `BLOCK-1` dialog. Slice 01's `tests/fixtures/live/` cases were not in this lane yet.
 
 **Slice**: The top of the panel says what the run waits on: one block per `attention[]` entry (kind, how long open, title, body, the excerpt with hit lines bright, and Answer for blocks and asks, opening PRD-001's dialog), then one Now line built from `now` (what it waits on first, factory's label, since when, progress, resume time, idle time, the decision count, driver dead, stopping). Nothing else in the panel changes.
 
