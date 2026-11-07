@@ -3,7 +3,12 @@
 **Source**: [`prd.md`](prd.md) → §8 FR-6, and the timeline half of §5 FR-3's acceptance. **Depends on**: 02 (it fills `mods/factory-run/sections/gate.js`, and draws the timeline slice 02 holds). Independent of 03, 04 and 06.
 **Created**: 2026-11-07
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built `mods/factory-run/lib/gate.js` (`gateView`, `ciView`, `timelineRows`, `toneKey`) with `tests/gate.test.js` (16 tests, 100% lines of `lib/gate.js`), and drew it in `mods/factory-run/sections/gate.js`: a "Gate and CI" block (a state dot, the head line, the tail or excerpt in a monospace box with hits in full color and context dimmed, "fix changed nothing" in the blocked color, CI's running checks and excerpt), then "Timeline", one row per event with its tone dot, `HH:MM` and label.
+- Inner loop: 3 runs, 1 red, under 1 min. The red run caught a theme color typed `string` where gpui wants a hex color type (types tier).
+- The held timeline is `snap.timeline` (slice 02 merges and caps it there), not a `ctx` field as Current code worded it; the section reads it from the snapshot.
+- A green finished gate draws its head line only: AD-9.
+- Left for the checkpoint: Prove (FR-6 `gate-red`, `gate-running`, `timeline-noise` screenshots; FR-3 `later` with `calls.log` and the timeline screenshot).
 
 **Slice**: The panel shows the gate (attempt, command, elapsed and the last 8 tail lines while it runs; the failing excerpt and "fix changed nothing" when red), CI (state, round, running checks, the excerpt when red), and the timeline newest first, a dot per row in its tone's color, `noise` rows hidden.
 
