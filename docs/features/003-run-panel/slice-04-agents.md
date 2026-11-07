@@ -3,7 +3,13 @@
 **Source**: [`prd.md`](prd.md) → §7 FR-5. **Depends on**: 02 (it fills `mods/factory-run/sections/agents.js`, which slice 02 lays out and feeds the snapshot). Independent of 03, 05 and 06.
 **Created**: 2026-11-07
 
-**Progress**: _(written as it lands — what was built, the gate numbers, what a review caught)_
+**Progress**:
+- Built: `mods/factory-run/lib/agents.js` (`workerRows(workers, at)`, `duration`) and `tests/agents.test.js` (5 tests, 100% lines); `sections/agents.js` draws an "Agents" heading, then per worker a dot (`t.working` when alive, `t.muted` otherwise), who and `doing.label`, the narration in `t.dim`, and "running … · last write … ago" in `t.muted`. No worker rows → the section draws nothing.
+- Who reads role, then `slice N` or `checkpoint N`, then `job`, joined by " · "; the role is dropped when it repeats ("checkpoint 1 · gateFix"). `doing` falls back to `doing.tool` when its label is null.
+- Deviation: `alive` is a boolean (`true` only for `alive === true`), not a string or null as task 1 lists, since it draws a dot, not text.
+- Tests use inline workers, not slice 01's `workers-three` file, which is not in this lane yet; the Prove row uses that file.
+- Inner loop: 1 run, 0 red, under 1 min. The mods tier writes an unignored `sections/gpui-kit.d.ts`, removed before return (AD-3).
+- Prove (FR-5, `workers-three` screenshot and `status` `.txt`): left for checkpoint 2.
 
 **Slice**: Under Now, one row per worker: its role and slice, what it is doing, its narration dimmed, how long the current command has run and when it last wrote, and an alive dot. Null fields show as blanks. The panel never calls a worker stuck.
 
