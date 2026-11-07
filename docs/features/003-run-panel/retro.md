@@ -45,3 +45,24 @@ None measured. `make gate` ran in 14 s with 100% lines, and every tier earned it
 ## Score
 
 4/5. Every defect polish fixed was real and found before merge, and the gate stayed green throughout. A point is off because 8 of 18 second-opinion passes and the leaks rule spent effort on fixtures and false positives.
+
+## Numbers
+
+<!-- factory:numbers -->
+| role | workers | own | subagents | weighted | minutes | turns |
+|---|---:|---:|---:|---:|---:|---:|
+| build | 6 | 1933472 | 0 | 1933472 | 24 | 148 |
+| checkpoint | 2 | 1445940 | 0 | 1445940 | 15 | 106 |
+| polish | 1 | 90316 | 1935953 | 2026269 | 0 | 62 |
+| total | 9 | 3469727 | 1935953 | 5405680 | 39 | 316 |
+
+Knobs: build opus/high default · fix opus/high default · checkpoint opus/high default · polish opus/high default · budget 30000000 default · lanes 3 · factory 0.13.1 · claude 2.1.316
+
+Hypothesis: none
+
+quality: gate_red 0 · worker_gate_red 0 · fix_commits 0 · ci_red_rounds 0 · ci_reruns 0 · findings high=1 medium=12 low=25 fixed=24 parked=10 · decisions 15 decide 0 blocks 0
+
+Pack (build): slice 7840 · prd_sections 3449 · log 3662 · outline 1963 · lookup 1115 · contract 3095 · autonomy 8610 · inner_loop 25 · total 29758 · start_context 18908
+
+Compared with: No earlier retro in this repo.
+<!-- /factory:numbers -->
