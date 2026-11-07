@@ -170,6 +170,9 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
   - skipped when the target exists
   - dropped when the result is not a regular file
 - The source path is `evidence.root` joined with `path`. Any path that leaves `root` is rejected.
+
+  *Corrected 2026-11-07 (slice recon, factory 0.13.1): `evidence.root` is the run-relative `"evidence"` on every run, never absolute (factory PRD-024 slice 07), so `root` joined with `path` is not a path the mod can open. The source is `<runs dir>/<runId>/<root>/<path>`. The runs dir is `props().runs`, default `~/.local/share/factory/runs`: the prop and default `factory-spaces` already uses (`mods/factory-spaces/main.js:119`).*
+
 - Shots are grouped by checkpoint, newest first. Each shows its `caption`, under a thumbnail as wide as the panel. Non-image evidence shows as a list of names and sizes.
 - A run's `shots/<runId>/` is removed when its id is no longer in `factory.spaceRuns.recent`. A dismissed run is still on factory's recent list, so its shots stay until factory drops it.
 
@@ -218,7 +221,17 @@ The panel never calls a worker stuck. Factory gives no such verdict, and a 10 mi
 
 ## 12. Slices
 
-_(Not sliced yet.)_
+Six slices. Two independent ones first, then four branches off the second.
+
+- **01 — Fake factory for live** (seed state, §11): `tests/fixtures/fake-factory-live.sh` answers `live` from canned cases in `tests/fixtures/live/`, one per QA row that names a fixture, and passes every other call to PRD-001's fixture wrapper. It logs each call's time, and writes the evidence files the screenshot cases list. It also writes the harness recipe `features/run-panel.md`. No product change and no Prove rows: its own test runs in the gate.
+- **02 — Run button, the shown run and the live loop** (FR-1, FR-2, FR-3; the spine, highest risk): the `factory-tabs` clone with Run, the layout's `run` slot, the `tabs` drift record, `factory.spaceRuns` written on change, run choice and chips, and the `live` loop with its held timeline (the 200-row cap of FR-6). It lays out one section file per later slice (`mods/factory-run/sections/{now,agents,gate,shots}.js`) as stubs, so the branches never edit the same file.
+- **03 — Waiting on you and Now** (FR-4), **04 — Agents** (FR-5), **05 — Gate, CI and the timeline** (FR-6, and FR-3's timeline screenshot), **06 — Checkpoint screenshots** (FR-7): each fills its own section file and its own `lib/` file. They depend on 02 only and are mutually independent.
+
+**Order.** 01 and 02 run in parallel and land first, so the first checkpoint proves FR-1 to FR-3 on the fake before anything is drawn on them. 03 to 06 then run three at a time (`lanes = 3`).
+
+**Checkpoints**, every 2 done slices: after the 2nd (01 and 02), after the 4th and after the 6th. Each drives the Prove rows of the slices it covers through `verify-herdr-factory` with `VERIFY_HERDR_INPUT=x11`, plus the full gate.
+
+**Workflow.** One branch, `feat/run-panel`, one PR, one commit per slice, Prove at the checkpoints. `qa-guide.md` holds the two Human rows: FR-4's five-second read and FR-7's thumbnail size.
 
 ## 13. Non-goals
 
@@ -232,6 +245,8 @@ _(Not sliced yet.)_
 ## 14. Verification notes
 
 Checked 2026-11-07 on `main` after PRD-002, herdr-app 0.1.13, factory 0.13.0. **Re-verify at slice entry**, against the factory release that ships `live`.
+
+Re-verified 2026-11-07 at slicing, on `feat/run-panel`, herdr-app 0.1.13, factory 0.13.1: every cite below holds, and the `tabs` hashes in §3 match `installed.json`. The one falsified claim, `evidence.root`, is corrected in §9.
 
 - `~/.config/herdr-app/mods/tabs/main.js:17`, `:22-46`: the per-space panel choice in `localStorage` `panels`. **The trap:** `syncPanel` keeps a stored choice only when `enabled` includes it (`:29`). The clone must count `run` as always enabled, or a space switch hides the Run panel.
 - `~/.config/herdr-app/mods/tabs/main.js:80-98`: `enabled` from `workspace.panels`, the panel buttons, and Files and Changes drawn only when listed.
