@@ -7,3 +7,10 @@ lanes = 3
 
 [lanes]
 seed = ["node_modules"]
+
+[leaks]
+# Factory text the run panel draws on purpose (slice numbers, block bodies).
+allow = [
+  { path = "tests/agents.test.js" },
+  { path = "tests/fixtures/live/block-markdown.json", scope = "all" },
+]
