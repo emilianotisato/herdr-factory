@@ -1,0 +1,367 @@
+{
+  "schema": 1,
+  "factory": "0.13.1",
+  "id": "<run>",
+  "feature": "<feature>",
+  "phase": "checkpoint",
+  "repo": "<repo>",
+  "branch": "feat/<run>",
+  "seq": 17,
+  "rev": "5a17c0e6a708a7ae",
+  "at": "2026-11-07T10:00:00Z",
+  "now": {
+    "waitingOn": "worker",
+    "label": "lane 4 build worker, checkpoint 2 fix worker, lane 5 build worker",
+    "since": "2026-11-07T09:40:00Z",
+    "progress": null,
+    "resumesAt": null,
+    "idleSeconds": 1,
+    "driverAlive": true,
+    "stopping": null
+  },
+  "attention": [],
+  "workers": [
+    {
+      "sessionId": "sess-build-04",
+      "role": "build",
+      "job": null,
+      "slice": 4,
+      "checkpoint": null,
+      "lane": 1,
+      "spawnedAt": "2026-11-07T09:40:00Z",
+      "alive": true,
+      "doing": {
+        "tool": "Bash",
+        "label": "Run the inner loop",
+        "at": "2026-11-07T09:59:00Z",
+        "inSubagent": false
+      },
+      "narration": "The cart total now rounds once, after tax; running the inner loop before writing the slice's progress.",
+      "running": {
+        "tool": "Bash",
+        "elapsedSeconds": 42
+      },
+      "lastWriteAt": "2026-11-07T09:59:30Z",
+      "outcome": null
+    },
+    {
+      "sessionId": "sess-fix-2-1",
+      "role": "fix",
+      "job": "gateFix",
+      "slice": null,
+      "checkpoint": 2,
+      "lane": 2,
+      "spawnedAt": "2026-11-07T09:52:00Z",
+      "alive": true,
+      "doing": {
+        "tool": "Edit",
+        "label": "Edit mods/cart/lib/shipping.js",
+        "at": "2026-11-07T09:59:00Z",
+        "inSubagent": false
+      },
+      "narration": "The threshold read the total after the code; it reads the subtotal now.",
+      "running": null,
+      "lastWriteAt": "2026-11-07T09:59:00Z",
+      "outcome": null
+    },
+    {
+      "sessionId": "sess-build-05",
+      "role": "build",
+      "job": null,
+      "slice": 5,
+      "checkpoint": null,
+      "lane": 3,
+      "spawnedAt": "2026-11-07T09:56:00Z",
+      "alive": true,
+      "doing": null,
+      "narration": null,
+      "running": null,
+      "lastWriteAt": "2026-11-07T09:57:00Z",
+      "outcome": null
+    }
+  ],
+  "gate": {
+    "n": 2,
+    "attempt": 1,
+    "cmd": null,
+    "running": false,
+    "startedAt": null,
+    "red": true,
+    "minutes": 1.4,
+    "cached": false,
+    "log": "gates/2-1.log",
+    "bytes": 51877,
+    "tail": [
+      "shellcheck: 9 files",
+      "=== 4. types",
+      "tsc: no errors",
+      "=== 5. test",
+      "ok 1 - cart total rounds once (33ms)",
+      "ok 2 - a discount code applies before tax (40ms)",
+      "ok 3 - free shipping reads the subtotal (7ms)",
+      "ok 4 - an empty cart has no checkout button (14ms)",
+      "ok 5 - a sold-out item leaves the cart (21ms)",
+      "ok 6 - cart total rounds once (28ms)",
+      "ok 7 - a discount code applies before tax (35ms)",
+      "ok 8 - free shipping reads the subtotal (42ms)",
+      "ok 9 - an empty cart has no checkout button (9ms)",
+      "ok 10 - a sold-out item leaves the cart (16ms)",
+      "ok 11 - cart total rounds once (23ms)",
+      "ok 12 - a discount code applies before tax (30ms)",
+      "ok 13 - free shipping reads the subtotal (37ms)",
+      "ok 14 - an empty cart has no checkout button (4ms)",
+      "ok 15 - a sold-out item leaves the cart (11ms)",
+      "ok 16 - cart total rounds once (18ms)",
+      "ok 17 - a discount code applies before tax (25ms)",
+      "ok 18 - free shipping reads the subtotal (32ms)",
+      "ok 19 - an empty cart has no checkout button (39ms)",
+      "ok 20 - a sold-out item leaves the cart (6ms)",
+      "ok 21 - cart total rounds once (13ms)",
+      "ok 22 - a discount code applies before tax (20ms)",
+      "ok 23 - free shipping reads the subtotal (27ms)",
+      "ok 24 - an empty cart has no checkout button (34ms)",
+      "ok 25 - a sold-out item leaves the cart (41ms)",
+      "ok 26 - cart total rounds once (8ms)",
+      "ok 27 - a discount code applies before tax (15ms)",
+      "ok 28 - free shipping reads the subtotal (22ms)",
+      "ok 29 - an empty cart has no checkout button (29ms)",
+      "ok 30 - a sold-out item leaves the cart (36ms)",
+      "ok 31 - cart total rounds once (3ms)",
+      "not ok 31 - free shipping reads the subtotal",
+      "  expected: 0",
+      "  actual: 4.99",
+      "  at freeShipping (tests/shipping.test.js)",
+      "make: *** [Makefile:22: test] Error 1"
+    ],
+    "excerpt": [
+      {
+        "text": "not ok 31 - free shipping reads the subtotal",
+        "hit": true
+      },
+      {
+        "text": "  expected: 0",
+        "hit": false
+      },
+      {
+        "text": "  actual: 4.99",
+        "hit": true
+      },
+      {
+        "text": "  at freeShipping (tests/shipping.test.js)",
+        "hit": false
+      },
+      {
+        "text": "make: *** [Makefile:22: test] Error 1",
+        "hit": true
+      }
+    ],
+    "fixEmpty": false
+  },
+  "ci": {
+    "state": "none",
+    "round": null,
+    "head": null,
+    "checks": [],
+    "excerpt": null
+  },
+  "evidence": {
+    "root": "evidence",
+    "checkpoints": [],
+    "skipped": 0,
+    "truncated": false
+  },
+  "decisions": {
+    "count": 3
+  },
+  "truncated": [],
+  "timeline": [
+    {
+      "seq": 1,
+      "ts": "2026-11-07T07:00:00Z",
+      "kind": "run_started",
+      "tone": "info",
+      "label": "run_started",
+      "data": {}
+    },
+    {
+      "seq": 2,
+      "ts": "2026-11-07T07:02:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(01)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-01",
+        "slice": 1
+      }
+    },
+    {
+      "seq": 3,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 4,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 5,
+      "ts": "2026-11-07T07:31:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(02)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-02",
+        "slice": 2
+      }
+    },
+    {
+      "seq": 6,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 7,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 8,
+      "ts": "2026-11-07T08:01:00Z",
+      "kind": "checkpoint_started",
+      "tone": "info",
+      "label": "checkpoint_started(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 9,
+      "ts": "2026-11-07T08:08:00Z",
+      "kind": "gate_run",
+      "tone": "green",
+      "label": "gate_run(1)",
+      "data": {
+        "attempt": 1,
+        "log": "gates/1-1.log",
+        "minutes": 2.1,
+        "n": 1,
+        "red": false
+      }
+    },
+    {
+      "seq": 10,
+      "ts": "2026-11-07T08:16:00Z",
+      "kind": "checkpoint_done",
+      "tone": "green",
+      "label": "checkpoint_done(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 11,
+      "ts": "2026-11-07T09:30:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(03)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-03",
+        "slice": 3
+      }
+    },
+    {
+      "seq": 12,
+      "ts": "2026-11-07T09:40:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(04)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-04",
+        "slice": 4
+      }
+    },
+    {
+      "seq": 13,
+      "ts": "2026-11-07T09:46:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(03)",
+      "data": {
+        "slice": 3
+      }
+    },
+    {
+      "seq": 14,
+      "ts": "2026-11-07T09:47:00Z",
+      "kind": "checkpoint_started",
+      "tone": "info",
+      "label": "checkpoint_started(2)",
+      "data": {
+        "n": 2
+      }
+    },
+    {
+      "seq": 15,
+      "ts": "2026-11-07T09:51:00Z",
+      "kind": "gate_run",
+      "tone": "red",
+      "label": "gate_run(2)",
+      "data": {
+        "attempt": 1,
+        "log": "gates/2-1.log",
+        "minutes": 1.4,
+        "n": 2,
+        "red": true
+      }
+    },
+    {
+      "seq": 16,
+      "ts": "2026-11-07T09:52:00Z",
+      "kind": "fix_spawned",
+      "tone": "info",
+      "label": "fix_spawned(2)",
+      "data": {
+        "attempt": 1,
+        "n": 2,
+        "session_id": "sess-fix-2-1"
+      }
+    },
+    {
+      "seq": 17,
+      "ts": "2026-11-07T09:56:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(05)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-05",
+        "slice": 5
+      }
+    }
+  ]
+}

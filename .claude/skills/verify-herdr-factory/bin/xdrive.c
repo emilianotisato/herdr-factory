@@ -2,6 +2,7 @@
  *   xdrive geometry            x y width height of the window
  *   xdrive click X Y           left click at X,Y in window pixels
  *   xdrive move X Y            pointer to X,Y
+ *   xdrive scroll X Y N        N wheel steps at X,Y: down when N > 0, up when N < 0
  *   xdrive type TEXT           type printable ASCII
  *   xdrive key NAME            press one key by keysym name: Return, Escape
  * DISPLAY names the private server; input.sh refuses the owner's. */
@@ -44,7 +45,7 @@ static void press(Display *d, KeySym ks) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) { fprintf(stderr, "usage: xdrive geometry|click X Y|move X Y|type TEXT|key NAME\n"); return 2; }
+  if (argc < 2) { fprintf(stderr, "usage: xdrive geometry|click X Y|move X Y|scroll X Y N|type TEXT|key NAME\n"); return 2; }
   Display *d = XOpenDisplay(NULL);
   if (!d) { fprintf(stderr, "xdrive: cannot open display %s\n", getenv("DISPLAY")); return 1; }
   int ev, er, ma, mi;
@@ -63,6 +64,17 @@ int main(int argc, char **argv) {
       XSync(d, False);
       usleep(60000);
       XTestFakeButtonEvent(d, 1, False, 0);
+    }
+  } else if (!strcmp(cmd, "scroll") && argc == 5) {
+    XTestFakeMotionEvent(d, -1, x + atoi(argv[2]), y + atoi(argv[3]), 0);
+    XSync(d, False);
+    usleep(80000);
+    int n = atoi(argv[4]), button = n < 0 ? 4 : 5;
+    for (int i = 0; i < abs(n); i++) {
+      XTestFakeButtonEvent(d, button, True, 0);
+      XTestFakeButtonEvent(d, button, False, 0);
+      XSync(d, False);
+      usleep(30000);
     }
   } else if (!strcmp(cmd, "type") && argc == 3) {
     for (const char *c = argv[2]; *c; c++) press(d, *c == ' ' ? XStringToKeysym("space") : (KeySym)(unsigned char)*c);

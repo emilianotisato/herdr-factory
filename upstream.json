@@ -7,6 +7,14 @@
     },
     "layout:main": {
       "json": "d25b961ea961fba1"
+    },
+    "tabs": {
+      "main.js": "7e5362914f6154d5",
+      "mod.json": "a504d5ac991bc4cc",
+      "win-close.svg": "ca74932a6d3f1a90",
+      "win-max.svg": "4bbb4fb6a79ab51d",
+      "win-min.svg": "b86a99b42001e95f",
+      "win-restore.svg": "188630362d9549bf"
     }
   }
 }
