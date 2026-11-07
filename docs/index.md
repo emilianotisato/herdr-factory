@@ -24,7 +24,7 @@
 
 A slice is `pending → building → done`, or `blocked` while it waits on the owner.
 
-**Build order:** 001 factory-cockpit, then 002 space-groups. Both change the cloned spaces mod `factory-spaces`, which 001 creates, and 002 amends 001 FR-2's screenshot acceptance. 001 itself waits on factory's structured status fields (factory idea `2026-11-06-feed-a-herdr-app-cockpit-from-factory-status`). `feat/space-groups` is stacked on `feat/factory-cockpit`.
+**Build order:** 001 factory-cockpit, then 002 space-groups. Both change the cloned spaces mod `factory-spaces`, which 001 creates, and 002 amends 001 FR-2's screenshot acceptance. 001 itself waits on factory's structured status fields (factory idea `2026-11-06-feed-a-herdr-app-cockpit-from-factory-status`). `feat/space-groups` is stacked on `feat/factory-cockpit`. 001 and 002 are merged. 003 run-panel is next: factory 0.13.1 ships `factory live` schema 1 (factory PRD-024). It touches `factory-spaces` (a new shared key) and the factory layout.
 
 **Retired numbers — never reused:** _(none yet)_
 

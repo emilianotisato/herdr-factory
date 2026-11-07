@@ -52,6 +52,7 @@ bin/hc.sh <run> ls --json        # the scratch core's terminals
 
 ```sh
 bin/input.sh <run> click 226 166 # window pixels, as in a shot.sh PNG at zoom 1
+bin/input.sh <run> scroll 480 500 10 # 10 wheel steps down at that point; -3 is three up
 bin/input.sh <run> type "Charge the saved card"
 bin/input.sh <run> key Return    # any keysym name: Escape, Tab
 bin/input.sh <run> geometry      # x y width height of the window
@@ -117,7 +118,7 @@ Closes the window (`window.close` on the scratch home, then the recorded pid, ch
 | `bin/doctor.sh <run>` | read-only health check |
 | `bin/herdr.sh <run> <args…>` | `herdr-app <args…>` on the scratch window |
 | `bin/hc.sh <run> <args…>` | `hc <args…>` on the scratch core |
-| `bin/input.sh <run> click X Y\|type T\|key K\|geometry` | pointer and keys, private X display only |
+| `bin/input.sh <run> click X Y\|scroll X Y N\|type T\|key K\|geometry` | pointer and keys, private X display only |
 | `bin/restart.sh <run>` | quit and start the window again, localStorage and spaces kept |
 | `bin/appearance.sh <run> light\|dark\|system` | the window's appearance |
 | `bin/shot.sh <run> <name> [dir]` | PNG plus status and ls |

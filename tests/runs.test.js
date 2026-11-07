@@ -13,6 +13,7 @@ import {
   parseStatus,
   prNumber,
   readStatus,
+  spaceRuns,
   strip,
   STRIP_HEIGHT,
   TOO_OLD_HEIGHT,
@@ -370,4 +371,56 @@ test("a lane is a strip high per run, and its dot is its most urgent run", () =>
   assert.equal(urgent(undefined), null);
   const shippedOnly = bySpace({ kind: "ok", runs: [run("024")] }, [places[0]]);
   assert.equal(urgent(shippedOnly.alpha), "done");
+});
+
+test("the space-runs key maps each space to its strips in strip order", () => {
+  const lanes = bySpace(current, places);
+  const value = spaceRuns(lanes, current, undefined);
+  assert.deepEqual(Object.keys(value.spaces), ["alpha", "beta"]);
+  assert.deepEqual(
+    value.spaces.alpha,
+    lanes.alpha.strips.map((s) => s.id),
+  );
+  assert.deepEqual(
+    value.spaces.beta,
+    lanes.beta.strips.map((s) => s.id),
+  );
+  assert.deepEqual(
+    value.recent,
+    current.runs.map((r) => r.id),
+  );
+});
+
+test("a dismissed run stays in recent and leaves its space", () => {
+  const gone = run("024").id;
+  const kept = { kind: "ok", runs: current.runs.filter((r) => r.id !== gone) };
+  const value = spaceRuns(bySpace(kept, places), current, null);
+  assert.ok(value.recent.includes(gone));
+  assert.equal(Object.values(value.spaces).flat().includes(gone), false);
+});
+
+test("the space-runs key is written only when it changes", () => {
+  const lanes = bySpace(current, places);
+  const first = spaceRuns(lanes, current, undefined);
+  assert.notEqual(first, null);
+  const stored = JSON.parse(JSON.stringify(first));
+  assert.equal(spaceRuns(bySpace(current, places), current, stored), null);
+  const fewer = { kind: "ok", runs: current.runs.slice(1) };
+  assert.notEqual(spaceRuns(bySpace(fewer, places), fewer, stored), null);
+  const kept = { kind: "ok", runs: current.runs.slice(1) };
+  const dismissed = spaceRuns(bySpace(kept, places), current, stored);
+  assert.deepEqual(dismissed?.recent, stored.recent);
+  assert.notDeepEqual(dismissed?.spaces, stored.spaces);
+});
+
+test("no answer from factory writes no space-runs key", () => {
+  assert.equal(spaceRuns({}, NONE, undefined), null);
+  assert.equal(
+    spaceRuns(
+      bySpace(parseStatus(fixture("0.12.0")), places),
+      parseStatus(fixture("0.12.0")),
+      undefined,
+    ),
+    null,
+  );
 });

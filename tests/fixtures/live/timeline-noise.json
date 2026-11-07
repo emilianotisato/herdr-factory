@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "factory": "0.13.1",
+  "id": "<run>",
+  "feature": "<feature>",
+  "phase": "closeout",
+  "repo": "<repo>",
+  "branch": "feat/<run>",
+  "seq": 17,
+  "rev": "5a17c0e881af14c1",
+  "at": "2026-11-07T10:00:00Z",
+  "now": {
+    "waitingOn": "review",
+    "label": "review, 1 of 2 passes done",
+    "since": "2026-11-07T09:54:00Z",
+    "progress": {
+      "done": 1,
+      "of": 2
+    },
+    "resumesAt": null,
+    "idleSeconds": 120,
+    "driverAlive": true,
+    "stopping": null
+  },
+  "attention": [],
+  "workers": [],
+  "gate": {
+    "n": 1,
+    "attempt": 1,
+    "cmd": null,
+    "running": false,
+    "startedAt": null,
+    "red": false,
+    "minutes": 2.1,
+    "cached": false,
+    "log": "gates/1-1.log",
+    "bytes": 48210,
+    "tail": [
+      "=== 7. test",
+      "ok 212 tests, 0 failed",
+      "coverage 93.4% (floor 90%)",
+      "gate: green in 2m 06s"
+    ],
+    "excerpt": null,
+    "fixEmpty": false
+  },
+  "ci": {
+    "state": "none",
+    "round": null,
+    "head": null,
+    "checks": [],
+    "excerpt": null
+  },
+  "evidence": {
+    "root": "evidence",
+    "checkpoints": [],
+    "skipped": 0,
+    "truncated": false
+  },
+  "decisions": {
+    "count": 3
+  },
+  "truncated": [],
+  "timeline": [
+    {
+      "seq": 16,
+      "ts": "2026-11-07T09:54:00Z",
+      "kind": "collect_started",
+      "tone": "info",
+      "label": "collect_started",
+      "data": {
+        "dir": "reviews/1",
+        "passes": 2,
+        "reused": false
+      }
+    },
+    {
+      "seq": 17,
+      "ts": "2026-11-07T09:58:00Z",
+      "kind": "review_pass_done",
+      "tone": "noise",
+      "label": "review_pass_done(1/2)",
+      "data": {
+        "k": 1,
+        "of": 2,
+        "seconds": 241
+      }
+    }
+  ]
+}

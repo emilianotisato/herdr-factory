@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "factory": "0.13.1",
+  "id": "<run>",
+  "feature": "<feature>",
+  "phase": "building",
+  "repo": "<repo>",
+  "branch": "feat/<run>",
+  "seq": 12,
+  "rev": "5a17c0df3c6ef362",
+  "at": "2026-11-07T10:00:00Z",
+  "now": {
+    "waitingOn": "worker",
+    "label": "lane 3 build worker, lane 4 build worker",
+    "since": "2026-11-07T09:30:00Z",
+    "progress": null,
+    "resumesAt": null,
+    "idleSeconds": 2,
+    "driverAlive": true,
+    "stopping": null
+  },
+  "attention": [],
+  "workers": [
+    {
+      "sessionId": "sess-build-03",
+      "role": "build",
+      "job": null,
+      "slice": 3,
+      "checkpoint": null,
+      "lane": 1,
+      "spawnedAt": "2026-11-07T09:30:00Z",
+      "alive": true,
+      "doing": {
+        "tool": "Bash",
+        "label": "Run the inner loop",
+        "at": "2026-11-07T09:59:00Z",
+        "inSubagent": false
+      },
+      "narration": "The cart total now rounds once, after tax; running the inner loop before writing the slice's progress.",
+      "running": {
+        "tool": "Bash",
+        "elapsedSeconds": 42
+      },
+      "lastWriteAt": "2026-11-07T09:59:30Z",
+      "outcome": null
+    },
+    {
+      "sessionId": "sess-build-04",
+      "role": "build",
+      "job": null,
+      "slice": 4,
+      "checkpoint": null,
+      "lane": 2,
+      "spawnedAt": "2026-11-07T09:40:00Z",
+      "alive": true,
+      "doing": {
+        "tool": "Edit",
+        "label": "Edit mods/cart/lib/coupons.js",
+        "at": "2026-11-07T09:58:00Z",
+        "inSubagent": false
+      },
+      "narration": "Coupons now stack with the member price; one test left to update.",
+      "running": null,
+      "lastWriteAt": "2026-11-07T09:59:30Z",
+      "outcome": null
+    }
+  ],
+  "gate": {
+    "n": 1,
+    "attempt": 1,
+    "cmd": null,
+    "running": false,
+    "startedAt": null,
+    "red": false,
+    "minutes": 2.1,
+    "cached": false,
+    "log": "gates/1-1.log",
+    "bytes": 48210,
+    "tail": [
+      "=== 7. test",
+      "ok 212 tests, 0 failed",
+      "coverage 93.4% (floor 90%)",
+      "gate: green in 2m 06s"
+    ],
+    "excerpt": null,
+    "fixEmpty": false
+  },
+  "ci": {
+    "state": "none",
+    "round": null,
+    "head": null,
+    "checks": [],
+    "excerpt": null
+  },
+  "evidence": {
+    "root": "evidence",
+    "checkpoints": [],
+    "skipped": 0,
+    "truncated": false
+  },
+  "decisions": {
+    "count": 3
+  },
+  "truncated": [],
+  "timeline": [
+    {
+      "seq": 1,
+      "ts": "2026-11-07T07:00:00Z",
+      "kind": "run_started",
+      "tone": "info",
+      "label": "run_started",
+      "data": {}
+    },
+    {
+      "seq": 2,
+      "ts": "2026-11-07T07:02:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(01)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-01",
+        "slice": 1
+      }
+    },
+    {
+      "seq": 3,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 4,
+      "ts": "2026-11-07T07:30:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(01)",
+      "data": {
+        "slice": 1
+      }
+    },
+    {
+      "seq": 5,
+      "ts": "2026-11-07T07:31:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(02)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-02",
+        "slice": 2
+      }
+    },
+    {
+      "seq": 6,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_committed",
+      "tone": "info",
+      "label": "slice_committed(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 7,
+      "ts": "2026-11-07T08:00:00Z",
+      "kind": "slice_done",
+      "tone": "green",
+      "label": "slice_done(02)",
+      "data": {
+        "slice": 2
+      }
+    },
+    {
+      "seq": 8,
+      "ts": "2026-11-07T08:01:00Z",
+      "kind": "checkpoint_started",
+      "tone": "info",
+      "label": "checkpoint_started(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 9,
+      "ts": "2026-11-07T08:08:00Z",
+      "kind": "gate_run",
+      "tone": "green",
+      "label": "gate_run(1)",
+      "data": {
+        "attempt": 1,
+        "log": "gates/1-1.log",
+        "minutes": 2.1,
+        "n": 1,
+        "red": false
+      }
+    },
+    {
+      "seq": 10,
+      "ts": "2026-11-07T08:16:00Z",
+      "kind": "checkpoint_done",
+      "tone": "green",
+      "label": "checkpoint_done(1)",
+      "data": {
+        "n": 1
+      }
+    },
+    {
+      "seq": 11,
+      "ts": "2026-11-07T09:30:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(03)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-03",
+        "slice": 3
+      }
+    },
+    {
+      "seq": 12,
+      "ts": "2026-11-07T09:40:00Z",
+      "kind": "slice_spawned",
+      "tone": "info",
+      "label": "slice_spawned(04)",
+      "data": {
+        "pid": 0,
+        "session_id": "sess-build-04",
+        "slice": 4
+      }
+    }
+  ]
+}
