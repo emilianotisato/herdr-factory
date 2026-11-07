@@ -223,8 +223,8 @@ test("a body is trimmed and keeps its markdown for the panel to draw", () => {
 
 test("the Now label drops what the lead already says", () => {
   assert.deepEqual(
-    line({ waitingOn: "owner", label: "the owner: BLOCK-1" }).slice(0, 2),
-    ["Waiting on owner", "BLOCK-1"],
+    line({ waitingOn: "owner", label: "the owner: Q1" }).slice(0, 2),
+    ["Waiting on owner", "Q1"],
   );
   assert.equal(
     line({ waitingOn: "nothing", label: "nothing in flight" })[1],

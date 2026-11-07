@@ -72,8 +72,8 @@ export function lead(waitingOn) {
 }
 
 /**
- * Factory's label minus what the lead already says. "the owner: BLOCK-1"
- * after "Waiting on owner" keeps "BLOCK-1". Waiting on nothing has nothing to
+ * Factory's label minus what the lead already says. "the owner: Q1"
+ * after "Waiting on owner" keeps "Q1". Waiting on nothing has nothing to
  * add, so its label ("nothing in flight") is dropped. Any other label stays.
  * @param {unknown} label @param {unknown} waitingOn @returns {string | null}
  */
