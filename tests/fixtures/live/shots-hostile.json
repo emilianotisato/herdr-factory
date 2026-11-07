@@ -56,7 +56,7 @@
         "state": "done",
         "files": [
           {
-            "path": "cp-1/cart-with-two-items.png",
+            "path": "checkpoint-1/cart-with-two-items.png",
             "kind": "image",
             "bytes": 843,
             "mtime": "2026-11-07T08:14:00Z",
@@ -67,7 +67,7 @@
             "sidecars": []
           },
           {
-            "path": "cp-1/../../escape.png",
+            "path": "checkpoint-1/../../escape.png",
             "kind": "image",
             "bytes": 805,
             "mtime": "2026-11-07T08:13:00Z",
@@ -78,7 +78,7 @@
             "sidecars": []
           },
           {
-            "path": "cp-1/linked-receipt.png",
+            "path": "checkpoint-1/linked-receipt.png",
             "kind": "image",
             "bytes": 832,
             "mtime": "2026-11-07T08:12:00Z",

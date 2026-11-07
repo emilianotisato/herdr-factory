@@ -11,7 +11,7 @@
   "at": "2026-11-07T10:00:00Z",
   "now": {
     "waitingOn": "worker",
-    "label": "slice 04 build worker, checkpoint 2 fix worker, slice 05 build worker",
+    "label": "lane 4 build worker, checkpoint 2 fix worker, lane 5 build worker",
     "since": "2026-11-07T09:40:00Z",
     "progress": null,
     "resumesAt": null,
@@ -130,7 +130,7 @@
       "not ok 31 - free shipping reads the subtotal",
       "  expected: 0",
       "  actual: 4.99",
-      "  at tests/shipping.test.js:48:5",
+      "  at freeShipping (tests/shipping.test.js)",
       "make: *** [Makefile:22: test] Error 1"
     ],
     "excerpt": [
@@ -147,7 +147,7 @@
         "hit": true
       },
       {
-        "text": "  at tests/shipping.test.js:48:5",
+        "text": "  at freeShipping (tests/shipping.test.js)",
         "hit": false
       },
       {

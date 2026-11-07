@@ -11,7 +11,7 @@
   "at": "2026-11-07T10:00:00Z",
   "now": {
     "waitingOn": "owner",
-    "label": "the owner: BLOCK-1",
+    "label": "the owner: Q1",
     "since": "2026-11-07T09:48:00Z",
     "progress": null,
     "resumesAt": null,
@@ -21,7 +21,7 @@
   },
   "attention": [
     {
-      "id": "BLOCK-1",
+      "id": "Q1",
       "kind": "block",
       "openedAt": "2026-11-07T09:48:00Z",
       "title": "Free shipping over 50: is the threshold before or after the discount code?",
@@ -31,7 +31,7 @@
         "log": null,
         "excerpt": null
       },
-      "answer": ["factory", "answer", "--feature", "<feature>", "BLOCK-1"]
+      "answer": ["factory", "answer", "--feature", "<feature>", "Q1"]
     }
   ],
   "workers": [
@@ -50,7 +50,7 @@
       "lastWriteAt": "2026-11-07T09:48:00Z",
       "outcome": {
         "status": "blocked",
-        "block": "BLOCK-1 — free shipping threshold"
+        "block": "Q1 — free shipping threshold"
       }
     }
   ],
@@ -217,7 +217,7 @@
       "tone": "owner",
       "label": "slice_blocked(03)",
       "data": {
-        "block_id": "BLOCK-1",
+        "block_id": "Q1",
         "slice": 3
       }
     },

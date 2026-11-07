@@ -10,6 +10,7 @@
 - Tests use inline workers, not slice 01's `workers-three` file, which is not in this lane yet; the Prove row uses that file.
 - Inner loop: 1 run, 0 red, under 1 min. The mods tier writes an unignored `sections/gpui-kit.d.ts`, removed before return (AD-3).
 - Prove (FR-5, `workers-three` screenshot and `status` `.txt`): left for checkpoint 2.
+- **Checkpoint 1, FR-5:** `workers-three`, three rows, the third with only who and last write `cp-1/agents-workers-three.png`; its `.txt` reads `"errors": []` `cp-1/agents-workers-three.txt`.
 
 **Slice**: Under Now, one row per worker: its role and slice, what it is doing, its narration dimmed, how long the current command has run and when it last wrote, and an alive dot. Null fields show as blanks. The panel never calls a worker stuck.
 

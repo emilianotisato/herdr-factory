@@ -31,7 +31,7 @@ Preconditions:
 - **The delayed event**: `use … later`, with the panel shown. 3 s after `use`, the answer gains one `slice_done` row of tone `green`, and `seq` and `rev` change; a held `--wait` call returns then. Read the time of that answer in `calls.log`, shoot 2 s after it: the row is on the timeline.
 - **Open the panel**: `bin/input.sh <run> click X Y` on Run in the tab bar, coordinates off a fresh shot. Click again to hide it.
 - **Read the calls**: `cat <scratch>/fake/calls.log`. One line per call: start time (UTC, ms), duration, `exit=<code>`, the argv, e.g. `2026-11-07T10:00:01.234Z 2998ms exit=0 live 003-20261107-a001 --json --since 11 --wait 20`. Hidden panel: `wc -l` before and after a wait shows no new `live` line.
-- **Screenshots**: `use … shots-three` writes three PNGs under `<scratch>/fixtures/data/runs/<runId>/evidence/cp-1` and `cp-2`. `use … shots-hostile` writes one PNG, one listed `cp-1/../../escape.png` (written at the run folder's top, outside `evidence/`), and one symlink to a PNG under `<scratch>/fake/outside/`. Then `ls -la <scratch>/home/data/factory-run/shots/<runId>/` and `stat -c '%n %y' <scratch>/home/data/factory-run/shots/<runId>/*`, twice, a poll apart.
+- **Screenshots**: `use … shots-three` writes three PNGs under `<scratch>/fixtures/data/runs/<runId>/evidence/checkpoint-1` and `checkpoint-2`. `use … shots-hostile` writes one PNG, one listed `checkpoint-1/../../escape.png` (written at the run folder's top, outside `evidence/`), and one symlink to a PNG under `<scratch>/fake/outside/`. Then `ls -la <scratch>/home/data/factory-run/shots/<runId>/` and `stat -c '%n %y' <scratch>/home/data/factory-run/shots/<runId>/*`, twice, a poll apart.
 - **Proof**: the PNG, the case name and run id, `calls.log` cut to the drive, and for shots the `ls -la` and `stat` transcripts.
 
 ## Gotchas
@@ -42,3 +42,6 @@ Preconditions:
 - `use` again on the same run first drops the previous case and its files. `bin/cleanup.sh` takes the fake with the scratch.
 - `calls.log` keeps every call since `build`. Cut it by line count before a drive, not by deleting it.
 - Never point the fake's wrapper, or a layout's `runs`, at `~/.local/share/factory`.
+- A call already in flight when `use` runs answers from what it read at its start, so a held call on the wrapper ignores the new case. For `later`, `use` first, then click the run's chip within a second: its first call has no wait, and the held call after it returns at the due time.
+- To switch a case on the shown run without waiting out a held call, click another chip and then the run's own chip again: the new loop's first call has no `--wait`.
+- `workspace.panels` in `<scratch>/home/shared.json` is read when the window starts: edit it, then `bin/restart.sh`.

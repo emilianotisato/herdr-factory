@@ -8,6 +8,8 @@
 - **Inner loop:** 2 runs, 0 red, about 1 min of runs (5 s each). Nothing was caught. One trap: the mods tier wrote a `gpui-kit.d.ts` into `sections/` once the section imported `gpui-kit`. `.gitignore` now covers `mods/*/*/gpui-kit.d.ts` (AD-7).
 - **Deviations:** the Now line's own wording, AD-8 (fyi): `since` as "for 12m", `done` leads "Done", Answer kept for a block/ask without an argv.
 - **Prove (task 4):** left for the checkpoint, along with the FR-4 rows: ten `waitingOn` screenshots, `park`, `block-excerpt` with Answer, and the `BLOCK-1` dialog. Slice 01's `tests/fixtures/live/` cases were not in this lane yet.
+- **Checkpoint 1, FR-4:** each `waitingOn` leads the Now line: `cp-1/now-waiting-owner.png`, `cp-1/now-waiting-worker.png`, `cp-1/now-waiting-gate.png`, `cp-1/now-waiting-review.png` (1/3), `cp-1/now-waiting-ci.png`, `cp-1/now-waiting-quota.png` (resumes 22:41), `cp-1/now-waiting-budget.png`, `cp-1/now-waiting-driver.png` (driver dead), `cp-1/now-waiting-nothing.png`, `cp-1/now-waiting-done.png`.
+- **Checkpoint 1, FR-4:** park shows its title as the reason and no excerpt box `cp-1/now-park.png`; `block-excerpt` with its excerpt and Answer `cp-1/now-block-excerpt.png`; Answer clicked opens the dialog titled with the entry's id, `Answer Q1` `cp-1/now-block-excerpt-answer-dialog.png`.
 
 **Slice**: The top of the panel says what the run waits on: one block per `attention[]` entry (kind, how long open, title, body, the excerpt with hit lines bright, and Answer for blocks and asks, opening PRD-001's dialog), then one Now line built from `now` (what it waits on first, factory's label, since when, progress, resume time, idle time, the decision count, driver dead, stopping). Nothing else in the panel changes.
 

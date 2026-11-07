@@ -92,7 +92,7 @@
       "not ok 31 - free shipping reads the subtotal",
       "  expected: 0",
       "  actual: 4.99",
-      "  at tests/shipping.test.js:48:5",
+      "  at freeShipping (tests/shipping.test.js)",
       "make: *** [Makefile:22: test] Error 1"
     ],
     "excerpt": [
@@ -109,7 +109,7 @@
         "hit": true
       },
       {
-        "text": "  at tests/shipping.test.js:48:5",
+        "text": "  at freeShipping (tests/shipping.test.js)",
         "hit": false
       },
       {

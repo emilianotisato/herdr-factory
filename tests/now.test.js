@@ -12,7 +12,7 @@ import {
 const AT = "2026-11-07T15:00:00Z";
 const nowOf = (extra = {}) => ({
   waitingOn: "worker",
-  label: "slice 3 building",
+  label: "lane 3 building",
   since: "2026-11-07T14:48:00Z",
   progress: null,
   resumesAt: null,
@@ -55,7 +55,7 @@ test("a missing waitingOn reads as nothing", () => {
 test("the label and how long it has waited follow the lead", () => {
   assert.deepEqual(line({}), [
     "Waiting on worker",
-    "slice 3 building",
+    "lane 3 building",
     "for 12m",
   ]);
 });
@@ -121,7 +121,7 @@ test("durations and clock times", () => {
 });
 
 const blockEntry = {
-  id: "BLOCK-1",
+  id: "Q1",
   kind: "block",
   openedAt: "2026-11-07T14:20:00Z",
   title: "Checkout total rounds wrong",
@@ -134,13 +134,13 @@ const blockEntry = {
       { text: "  got 10.0499", hit: true },
     ],
   },
-  answer: ["factory", "answer", "--feature", "004", "004-x-a002", "BLOCK-1"],
+  answer: ["factory", "answer", "--feature", "004", "004-x-a002", "Q1"],
 };
 
 test("a block carries its kind, open time, text, excerpt and a question", () => {
   const [b] = attentionBlocks([blockEntry], AT);
   assert.deepEqual(b, {
-    id: "BLOCK-1",
+    id: "Q1",
     kind: "block",
     open: "40m",
     title: "Checkout total rounds wrong",
@@ -150,7 +150,7 @@ test("a block carries its kind, open time, text, excerpt and a question", () => 
       { text: "  got 10.0499", hit: true },
     ],
     question: {
-      id: "BLOCK-1",
+      id: "Q1",
       text: "Checkout total rounds wrong",
       answer: blockEntry.answer,
     },
@@ -160,13 +160,13 @@ test("a block carries its kind, open time, text, excerpt and a question", () => 
 test("an ask gets Answer too, a warn does not", () => {
   const [ask, warn] = attentionBlocks(
     [
-      { id: "ASK-2", kind: "ask", title: "Which currency?", answer: null },
+      { id: "Q2", kind: "ask", title: "Which currency?", answer: null },
       { id: "WARN-1", kind: "warn", title: "Disk nearly full" },
     ],
     AT,
   );
   assert.deepEqual(ask.question, {
-    id: "ASK-2",
+    id: "Q2",
     text: "Which currency?",
     answer: [],
   });

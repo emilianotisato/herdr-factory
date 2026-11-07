@@ -56,18 +56,18 @@
         "state": "done",
         "files": [
           {
-            "path": "cp-2/receipt-after-payment.png",
+            "path": "checkpoint-2/receipt-after-payment.png",
             "kind": "image",
             "bytes": 832,
             "mtime": "2026-11-07T09:18:00Z",
             "stable": true,
             "etag": "832-1794043080000",
             "caption": "Receipt after payment",
-            "citedBy": ["CP-2"],
+            "citedBy": ["checkpoint 2"],
             "sidecars": []
           },
           {
-            "path": "cp-2/checkout-step-two.png",
+            "path": "checkpoint-2/checkout-step-two.png",
             "kind": "image",
             "bytes": 805,
             "mtime": "2026-11-07T09:17:00Z",
@@ -84,14 +84,14 @@
         "state": "done",
         "files": [
           {
-            "path": "cp-1/cart-with-two-items.png",
+            "path": "checkpoint-1/cart-with-two-items.png",
             "kind": "image",
             "bytes": 843,
             "mtime": "2026-11-07T08:14:00Z",
             "stable": true,
             "etag": "843-1794039240000",
             "caption": "Cart with two items",
-            "citedBy": ["CP-1"],
+            "citedBy": ["checkpoint 1"],
             "sidecars": []
           }
         ]

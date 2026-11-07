@@ -11,7 +11,7 @@
   "at": "2026-11-07T10:00:00Z",
   "now": {
     "waitingOn": "owner",
-    "label": "the owner: BLOCK-1",
+    "label": "the owner: Q1",
     "since": "2026-11-07T09:50:00Z",
     "progress": null,
     "resumesAt": null,
@@ -21,11 +21,11 @@
   },
   "attention": [
     {
-      "id": "BLOCK-1",
+      "id": "Q1",
       "kind": "block",
       "openedAt": "2026-11-07T09:50:00Z",
       "title": "not ok 31 - free shipping reads the subtotal",
-      "body": "**Happened:** checkpoint 2's gate is red on `tests/shipping.test.js:48`: free shipping charges 4.99 on a 52.00 cart with a 5.00 code.\n**Options:** read the subtotal before the code; change the test.\n**Recommended:** read the subtotal before the code.\n",
+      "body": "**Happened:** checkpoint 2's gate is red on `tests/shipping.test.js`: free shipping charges 4.99 on a 52.00 cart with a 5.00 code.\n**Options:** read the subtotal before the code; change the test.\n**Recommended:** read the subtotal before the code.\n",
       "reason": {
         "source": "gate",
         "log": "gates/2-1.log",
@@ -43,7 +43,7 @@
             "hit": true
           },
           {
-            "text": "  at tests/shipping.test.js:48:5",
+            "text": "  at freeShipping (tests/shipping.test.js)",
             "hit": false
           },
           {
@@ -52,7 +52,7 @@
           }
         ]
       },
-      "answer": ["factory", "answer", "--feature", "<feature>", "BLOCK-1"]
+      "answer": ["factory", "answer", "--feature", "<feature>", "Q1"]
     }
   ],
   "workers": [],
@@ -106,7 +106,7 @@
       "not ok 31 - free shipping reads the subtotal",
       "  expected: 0",
       "  actual: 4.99",
-      "  at tests/shipping.test.js:48:5",
+      "  at freeShipping (tests/shipping.test.js)",
       "make: *** [Makefile:22: test] Error 1"
     ],
     "excerpt": [
@@ -123,7 +123,7 @@
         "hit": true
       },
       {
-        "text": "  at tests/shipping.test.js:48:5",
+        "text": "  at freeShipping (tests/shipping.test.js)",
         "hit": false
       },
       {
@@ -310,7 +310,7 @@
       "tone": "owner",
       "label": "checkpoint_blocked(2)",
       "data": {
-        "block_id": "BLOCK-1",
+        "block_id": "Q1",
         "n": 2
       }
     },

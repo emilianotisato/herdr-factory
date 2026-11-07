@@ -11,7 +11,7 @@
   "at": "2026-11-07T10:00:00Z",
   "now": {
     "waitingOn": "owner",
-    "label": "the owner: slice 03 left uncommitted changes in lane 1",
+    "label": "the owner: a build left uncommitted changes in lane 1",
     "since": "2026-11-07T09:45:00Z",
     "progress": null,
     "resumesAt": null,
@@ -24,7 +24,7 @@
       "id": "park-14",
       "kind": "park",
       "openedAt": "2026-11-07T09:45:00Z",
-      "title": "slice 03 left uncommitted changes in lane 1",
+      "title": "a build left uncommitted changes in lane 1",
       "body": null,
       "reason": {
         "source": "land",
@@ -220,7 +220,7 @@
       "data": {
         "asks": 0,
         "blocked": 0,
-        "reason": "slice 03 left uncommitted changes in lane 1"
+        "reason": "a build left uncommitted changes in lane 1"
       }
     }
   ]

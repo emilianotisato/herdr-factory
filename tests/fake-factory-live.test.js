@@ -10,6 +10,7 @@ import {
   statSync,
 } from "node:fs";
 import { homedir, tmpdir } from "node:os";
+import { setTimeout as sleep } from "node:timers/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -140,7 +141,7 @@ test("a case answers live with the run's own id, feature, repo and branch", (t) 
     "answer",
     "--feature",
     status.feature,
-    "BLOCK-1",
+    "Q1",
   ]);
   assert.deepEqual(
     got.timeline.map((e) => e.seq),
@@ -229,6 +230,29 @@ test("later gains one green row 3 s after use, and --wait returns on it", async 
   assert.ok(short.s >= 0.9 && short.s <= 2, `--wait 1 took ${short.s} s`);
   assert.equal(short.got.timeline.length, canned.timeline.length);
   assert.equal(short.got.rev, canned.rev);
+});
+
+test("once the later row has landed, a --wait from its seq is held", async (t) => {
+  t.after(() => use(runId, "none"));
+  const canned = caseFile("later.json");
+  use(runId, "later");
+  await sleep(3200);
+  const start = Date.now();
+  const got = JSON.parse(
+    execFileSync(factory, [
+      "live",
+      runId,
+      "--json",
+      "--since",
+      String(canned.seq + 1),
+      "--wait",
+      "1",
+    ]),
+  );
+  const s = (Date.now() - start) / 1000;
+  assert.ok(s >= 0.9 && s <= 2, `--wait 1 took ${s} s`);
+  assert.equal(got.seq, canned.seq + 1);
+  assert.deepEqual(got.timeline, []);
 });
 
 test("every case is a schema 1 answer with factory's field shapes", () => {

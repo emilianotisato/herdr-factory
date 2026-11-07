@@ -81,16 +81,16 @@ shots() {
   evidence="$(cat "$dir/runs")/$id/evidence"
   case "$name" in
     shots-three)
-      place "$at" receipt.png "$evidence/cp-2/receipt-after-payment.png"
-      place "$at" checkout.png "$evidence/cp-2/checkout-step-two.png"
-      place "$at" cart.png "$evidence/cp-1/cart-with-two-items.png"
+      place "$at" receipt.png "$evidence/checkpoint-2/receipt-after-payment.png"
+      place "$at" checkout.png "$evidence/checkpoint-2/checkout-step-two.png"
+      place "$at" cart.png "$evidence/checkpoint-1/cart-with-two-items.png"
       ;;
     shots-hostile)
-      place "$at" cart.png "$evidence/cp-1/cart-with-two-items.png"
-      place "$at" checkout.png "$evidence/cp-1/../../escape.png"
+      place "$at" cart.png "$evidence/checkpoint-1/cart-with-two-items.png"
+      place "$at" checkout.png "$evidence/checkpoint-1/../../escape.png"
       place "$at" receipt.png "$dir/outside/$id-receipt.png"
-      ln -s "$dir/outside/$id-receipt.png" "$evidence/cp-1/linked-receipt.png"
-      printf '%s\n' "$evidence/cp-1/linked-receipt.png" >>"$at/written"
+      ln -s "$dir/outside/$id-receipt.png" "$evidence/checkpoint-1/linked-receipt.png"
+      printf '%s\n' "$evidence/checkpoint-1/linked-receipt.png" >>"$at/written"
       ;;
   esac
   while IFS=$'\t' read -r path mtime; do
@@ -202,6 +202,8 @@ live() {
       else
         sleep "$wait"
       fi
+    elif [ "$wait" -gt 0 ] && [ "$since" != null ] && [ "$since" -ge "$(jq .seq "$at/later.json")" ]; then
+      sleep "$wait"
     fi
     [ "$(now_ms)" -ge "$due" ] && file="$at/later.json"
   elif [ "$wait" -gt 0 ]; then
